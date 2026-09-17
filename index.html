@@ -1,267 +1,594 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G6 Time Table</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>G6 Time Table</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      min-height: 100vh;
-      padding: 12px;
-    }
+  :root {
+    --navy: #08131f;
+    --navy-2: #0c1f33;
+    --green-dark: #0e2a20;
+    --green: #1d4d38;
+    --green-bright: #35c47f;
+    --gold: #d4af37;
+    --gold-soft: #e6c15a;
+    --text: #e8f0ec;
+    --muted: #7fa58f;
+    --card: rgba(16,40,32,0.72);
+    --card-line: rgba(80,140,110,0.35);
+    --danger: #ef6a6a;
+  }
 
-    h1 {
-      text-align: center;
-      font-size: 1.4rem;
-      padding: 14px 0 6px;
-      color: #38bdf8;
-      letter-spacing: 0.02em;
-    }
+  body {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(35,140,95,0.22), transparent 60%),
+      radial-gradient(900px 500px at 0% 110%, rgba(20,60,120,0.28), transparent 55%),
+      linear-gradient(160deg, var(--green-dark) 0%, var(--navy) 60%, var(--navy-2) 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 16px 16px 40px;
+  }
 
-    .subtitle {
-      text-align: center;
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-bottom: 16px;
-    }
+  .masthead { text-align:center; position:relative; padding-top: 8px; }
 
-    /* Day selector */
-    .days {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 4px 0 12px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .days::-webkit-scrollbar { display: none; }
+  .crest {
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #1f5c40, var(--green-dark) 70%);
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 22px rgba(212,175,55,0.35), inset 0 0 14px rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+  }
+  .crest span { font-size: 24px; font-weight:800; color: var(--gold-soft); font-family: Georgia, serif; }
 
-    .day-btn {
-      flex: 0 0 auto;
-      padding: 7px 16px;
-      border: 1.5px solid #334155;
-      border-radius: 20px;
-      background: #1e293b;
-      color: #94a3b8;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .day-btn.active {
-      background: #0ea5e9;
-      border-color: #0ea5e9;
-      color: #fff;
-      box-shadow: 0 0 12px rgba(14,165,233,0.35);
-    }
+  h1 {
+    font-size: 1.35rem; font-weight: 800; letter-spacing: 0.14em;
+    color: var(--gold-soft); text-transform: uppercase; font-family: Georgia, serif;
+  }
+  .subtitle { font-size: 0.72rem; color: var(--muted); margin-top: 4px; letter-spacing: 0.05em; }
 
-    /* Timetable cards */
-    .schedule { display: flex; flex-direction: column; gap: 8px; }
+  /* Clock */
+  .clock-panel {
+    margin: 18px auto 0; max-width: 420px;
+    background: linear-gradient(180deg, rgba(8,26,38,0.85), rgba(10,32,26,0.8));
+    border: 1px solid var(--card-line); border-radius: 16px;
+    padding: 12px 14px; display:flex; align-items:center; justify-content:space-between;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .clock-read {
+    position: relative;
+  }
+  .clock-read .label { font-size: 0.6rem; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; }
+  .clock-read .time {
+    font-size: 2rem; font-weight: 700; line-height: 1.05; color: var(--text);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+    font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  .clock-read .time .ampm { font-size: 0.9rem; color: var(--gold); margin-left: 2px; }
+  .clock-read .zone { font-size: 0.6rem; color: var(--muted); letter-spacing:0.1em; }
 
-    .card {
-      display: flex;
-      align-items: stretch;
-      background: #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #334155;
-    }
+  .clock-status { text-align:right; }
+  .clock-status .dot {
+    display:inline-flex; align-items:center; gap:6px; font-size:0.7rem; color:var(--gold-soft);
+    border:1px solid rgba(212,175,55,0.4); padding:4px 9px; border-radius: 20px; background: rgba(212,175,55,0.08);
+  }
+  .status-pip {
+    width:8px;height:8px;border-radius:50%;background:var(--gold-soft);
+    box-shadow:0 0 8px var(--gold); animation: pulse 1.6s infinite;
+  }
+  .clock-status .sim { margin-top:6px; font-size:0.62rem; color:var(--danger); display:none; font-weight:600; letter-spacing:0.06em; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    .period-num {
-      width: 44px;
-      min-width: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #64748b;
-      background: #162032;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .card.break-card .period-num {
-      background: #1a1a2e;
-      color: #475569;
-    }
+  /* Now banner */
+  .now-banner {
+    margin: 12px auto 0; max-width: 420px; text-align:center;
+    background: rgba(30,86,60,0.35); border:1px solid var(--card-line);
+    padding:8px 12px; border-radius: 10px; font-size:0.82rem; color:var(--text);
+  }
+  .now-banner b { color: var(--green-bright); }
+  .now-banner .gold { color: var(--gold-soft); }
 
-    .period-info {
-      flex: 1;
-      padding: 11px 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+  /* Day tabs */
+  .days {
+    display:flex; gap:6px; overflow-x:auto; max-width: 420px; margin: 16px auto 0;
+    padding-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width:none;
+  }
+  .days::-webkit-scrollbar { display:none; }
+  .day-btn {
+    flex: 1 1 0; min-width: 60px; padding: 8px 8px; border-radius: 10px;
+    border: 1.5px solid var(--card-line); background: var(--card); color: var(--muted);
+    font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all .18s; text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .day-btn.active {
+    background: linear-gradient(160deg, var(--green), #123826);
+    border-color: var(--green-bright); color: #eafff5;
+    box-shadow: 0 0 14px rgba(53,196,127,0.35);
+  }
+  .day-btn.weekend { opacity:0.45; }
 
-    .subject {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #f1f5f9;
-    }
+  /* Schedule */
+  .schedule { max-width: 420px; margin: 6px auto 0; display:flex; flex-direction:column; gap:8px; }
 
-    .card.break-card .period-info {
-      justify-content: center;
-    }
-    .card.break-card .subject {
-      color: #475569;
-      font-size: 0.8rem;
-      font-weight: 500;
-      font-style: italic;
-    }
+  .card {
+    display:flex; align-items:stretch; border-radius: 12px; overflow:hidden;
+    background: var(--card); border: 1px solid var(--card-line);
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .card.current {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold), 0 0 20px rgba(212,175,55,0.25);
+  }
+  .card.break-card { background: rgba(8,19,31,0.6); border-style: dashed; }
+  .card.lunch { border-color: rgba(212,175,55,0.5); }
 
-    /* Colour dots per subject */
-    .dot {
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      margin-right: 8px;
-      flex-shrink: 0;
-      vertical-align: middle;
-    }
+  .period-num {
+    width: 48px; min-width: 48px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:1px; background: rgba(10,30,24,0.6); border-right: 1px solid var(--card-line);
+  }
+  .period-num .p { font-size: 0.62rem; font-weight: 800; color: var(--gold); letter-spacing:0.08em; }
+  .period-num .t { font-size: 0.52rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card.lunch .period-num .p { color: var(--gold-soft); }
 
-    /* Subject colours */
-    .c-geo   { background: #f59e0b; }  /* ပထဝီဝင် */
-    .c-hist  { background: #ef4444; }  /* သမိုင်း */
-    .c-sci   { background: #10b981; }  /* သိပ္ပံ */
-    .c-my    { background: #a78bfa; }  /* မြန်မာ */
-    .c-math  { background: #3b82f6; }  /* သင်္ချာ */
-    .c-eng   { background: #06b6d4; }  /* Eng / eng */
-    .c-art   { background: #f472b6; }  /* arts */
-    .c-civ   { background: #fb923c; }  /* Cvics */
-    .c-mus   { background: #c084fc; }  /* Music */
-    .c-soc   { background: #34d399; }  /* Socials */
-    .c-hum   { background: #fbbf24; }  /* HUmanitration */
-    .c-brk   { background: #334155; }  /* break */
+  .period-info { flex:1; padding: 10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .subject { font-size: 0.95rem; font-weight: 600; color: var(--text); display:flex; align-items:center; }
+  .dot { width:9px; height:9px; border-radius:50%; margin-right:8px; flex-shrink:0; box-shadow: 0 0 8px currentColor; }
+  .end-time { font-size: 0.62rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
-    /* Hide all days except today initially */
-    .day-schedule { display: none; }
-    .day-schedule.active { display: flex; flex-direction: column; gap: 8px; }
+  .card.break-card .subject { font-style: italic; color: var(--muted); font-weight:500; font-size: 0.8rem; }
+  .card.break-card .end-time { color: var(--gold); }
 
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 24px 0 12px;
-      font-size: 0.65rem;
-      color: #475569;
-    }
-  </style>
+  /* Subject colours */
+  .c-geo   { color:#f59e0b; } .c-hist { color:#ef6a6a; } .c-sci  { color:#35c47f; }
+  .c-my    { color:#a78bfa; } .c-math { color:#4aa0ff; } .c-eng  { color:#2ec7d8; }
+  .c-art   { color:#f472b6; } .c-civ  { color:#fb923c; } .c-mus  { color:#c084fc; }
+  .c-soc   { color:#34d399; } .c-hum  { color:#fbbf24; } .c-brk  { color:#7fa58f; }
+
+  /* Test panel */
+  .test-panel {
+    max-width: 420px; margin: 20px auto 0;
+    background: rgba(8,19,31,0.7); border: 1px solid var(--card-line); border-radius: 14px; padding: 14px;
+  }
+  .test-panel .head {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px;
+  }
+  .test-panel .head h2 { font-size: 0.78rem; letter-spacing: 0.16em; color: var(--gold-soft); text-transform: uppercase; font-family: Georgia, serif; }
+  .test-panel .head .hint { font-size: 0.62rem; color: var(--muted); }
+
+  .kbd-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom: 12px; }
+  .kbd {
+    flex:1; min-width: 42px; text-align:center; padding: 7px 4px; border-radius: 8px;
+    background: var(--navy-2); border:1px solid var(--card-line); color: var(--text);
+    font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all .15s;
+  }
+  .kbd small { display:block; font-size: 0.55rem; color: var(--muted); font-weight: 500; }
+  .kbd:active { background: var(--green); border-color: var(--green-bright); }
+
+  .sound-btns { display:flex; gap:6px; flex-wrap:wrap; }
+  .sbtn {
+    flex:1; min-width:110px; padding: 9px 8px; border-radius: 9px; border:1px solid var(--card-line);
+    background: var(--card); color: var(--text); font-size: 0.74rem; font-weight:600; cursor:pointer; transition: all .15s;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .sbtn .ic { color: var(--gold); }
+  .sbtn:active { background: var(--green); border-color: var(--green-bright); transform: scale(0.97); }
+
+  .timer-row { margin-top: 12px; }
+  .timer-row .lbl { display:flex; justify-content:space-between; font-size: 0.68rem; color: var(--muted); margin-bottom:6px; }
+  .timer-row .lbl b { color: var(--gold-soft); font-variant-numeric: tabular-nums; }
+  .range { width: 100%; accent-color: var(--green-bright); }
+  .timer-reset { margin-top: 10px; display:flex; gap:8px; }
+  .mini {
+    flex:1; padding: 8px; border-radius: 8px; border:1px solid var(--card-line); background: rgba(255,255,255,0.03);
+    color: var(--text); font-size: 0.72rem; cursor:pointer;
+  }
+
+  /* Event log */
+  .event-log { max-width: 420px; margin: 14px auto 0; }
+  .event-log h2 { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+  .event-log .log { font-size: 0.7rem; color: var(--muted); min-height: 18px; }
+
+  /* Sound unlock */
+  #unlock {
+    position: fixed; left:50%; bottom:16px; transform: translateX(-50%);
+    background: linear-gradient(160deg, var(--gold), #b8912a); color: #142014;
+    border: none; border-radius: 30px; padding: 12px 22px; font-size: 0.85rem; font-weight: 800;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.45); cursor: pointer; z-index: 50; display:none;
+  }
+
+  footer { text-align:center; padding: 26px 0 8px; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.08em; }
+
+  @media (min-width: 560px) {
+    body { padding: 24px 24px 48px; }
+  }
+</style>
 </head>
 <body>
 
-<h1>G6 Time Table</h1>
-<p class="subtitle">Grade 6 &middot; Weekly Schedule</p>
+<div class="masthead">
+  <div class="crest"><span>G6</span></div>
+  <h1>Time Table</h1>
+  <p class="subtitle">Grade 6 &middot; Myanmar Standard Time</p>
+</div>
+
+<div class="clock-panel">
+  <div class="clock-read">
+    <div class="label">Current Time</div>
+    <div class="time"><span id="tH">--</span>:<span id="tM">--</span><span class="ampm" id="tA"></span></div>
+    <div class="zone">Asia/Yangon (UTC+6:30)</div>
+  </div>
+  <div class="clock-status">
+    <div class="dot"><span class="status-pip"></span><span id="tDay">--</span></div>
+    <div class="sim" id="simBadge">SIMULATED TIME</div>
+  </div>
+</div>
+
+<div class="now-banner" id="nowBanner">Loading&hellip;</div>
 
 <div class="days" id="days"></div>
-<div id="schedule"></div>
 
-<footer>Updated Sep 2026</footer>
+<div class="schedule" id="schedule"></div>
+
+<div class="test-panel">
+  <div class="head">
+    <h2>Test Console</h2>
+    <span class="hint">Shift + 1&ndash;8</span>
+  </div>
+  <div class="kbd-row" id="kbdRow"></div>
+  <div class="sound-btns">
+    <button class="sbtn" data-sound="start"><span class="ic">&#9654;</span> Start bell</button>
+    <button class="sbtn" data-sound="anthem"><span class="ic">&#127925;</span> Anthem</button>
+    <button class="sbtn" data-sound="chimes"><span class="ic">&#128339;</span> Chimes</button>
+    <button class="sbtn" data-sound="bell"><span class="ic">&#128276;</span> School bell</button>
+    <button class="sbtn" data-sound="patriotic"><span class="ic">&#128127;</span> Patriotic</button>
+  </div>
+  <div class="timer-row">
+    <div class="lbl"><span>Simulate time offset (minutes)</span><b id="offsetLbl">+0</b></div>
+    <input type="range" class="range" id="offsetRange" min="-180" max="180" step="5" value="0">
+  </div>
+  <div class="timer-reset">
+    <button class="mini" id="btnReal">Back to real time</button>
+    <button class="mini" id="btnNoon">Jump to 12:30 (lunch end)</button>
+    <button class="mini" id="btnEnd">Jump to 2:50 (patriotic)</button>
+  </div>
+</div>
+
+<div class="event-log">
+  <h2>Event Log</h2>
+  <div class="log" id="eventLog">No bells yet.</div>
+</div>
+
+<footer>G6 Timetable &middot; sounds at bell times &middot; updated Sep 2026</footer>
+
+<button id="unlock">&#128276; Enable sound</button>
 
 <script>
-const timetable = {
-  "Monday": [
-    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
-    { period: "2", subject: "သမိုင်း", cls: "c-hist" },
-    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
-    { period: "4", subject: "မြန်မာ", cls: "c-my" },
-    { period: "5", subject: "သင်္ချာ", cls: "c-math" },
-    { period: "brk", subject: "Break", cls: "c-brk" },
-    { period: "6", subject: "သင်္ချာ", cls: "c-math" },
-    { period: "7", subject: "Cvics", cls: "c-civ" },
-    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
-  ],
-  "Tuesday": [
-    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
-    { period: "2", subject: "သမိုင်း", cls: "c-hist" },
-    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
-    { period: "4", subject: "သင်္ချာ", cls: "c-math" },
-    { period: "5", subject: "Arts", cls: "c-art" },
-    { period: "brk", subject: "Break", cls: "c-brk" },
-    { period: "6", subject: "သင်္ချာ", cls: "c-math" },
-    { period: "7", subject: "သိပ္ပံ", cls: "c-sci" },
-    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
-  ],
-  "Wednesday": [
-    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
-    { period: "2", subject: "မြန်မာ", cls: "c-my" },
-    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
-    { period: "4", subject: "သင်္ချာ", cls: "c-math" },
-    { period: "5", subject: "Eng", cls: "c-eng" },
-    { period: "brk", subject: "Break", cls: "c-brk" },
-    { period: "6", subject: "သင်္ချာ", cls: "c-math" },
-    { period: "7", subject: "Music", cls: "c-mus" },
-    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
-  ],
-  "Thursday": [
-    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
-    { period: "2", subject: "မြန်မာ", cls: "c-my" },
-    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
-    { period: "4", subject: "Eng", cls: "c-eng" },
-    { period: "5", subject: "Eng", cls: "c-eng" },
-    { period: "brk", subject: "Break", cls: "c-brk" },
-    { period: "6", subject: "Socials", cls: "c-soc" },
-    { period: "7", subject: "Humanitration", cls: "c-hum" },
-    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
-  ],
-  "Friday": [
-    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
-    { period: "2", subject: "သိပ္ပံ", cls: "c-sci" },
-    { period: "3", subject: "Eng", cls: "c-eng" },
-    { period: "4", subject: "မြန်မာ", cls: "c-my" },
-    { period: "5", subject: "Eng", cls: "c-eng" },
-    { period: "brk", subject: "Break", cls: "c-brk" },
-    { period: "6", subject: "မြန်မာ", cls: "c-my" },
-    { period: "7", subject: "သမိုင်း", cls: "c-hist" },
-    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
-  ]
+"use strict";
+
+/* ---------------- Audio ---------------- */
+const SOUNDS = {
+  anthem:     "audio/anthem.mp3",
+  patriotic:  "audio/patriotic.mp3",
+  chimes:     "audio/westminster.mp3",
+  bell:       "audio/bell.mp3"
+};
+const audio = {};
+for (const k in SOUNDS) {
+  audio[k] = new Audio(SOUNDS[k]);
+  audio[k].preload = "auto";
+}
+let soundUnlocked = false;
+let currentSong = null;
+
+function unlock() {
+  soundUnlocked = true;
+  document.getElementById("unlock").style.display = "none";
+  for (const k in audio) {
+    const p = audio[k].play();
+    if (p !== undefined) p.then(() => audio[k].pause()).catch(() => {});
+  }
+}
+document.getElementById("unlock").onclick = unlock;
+document.addEventListener("pointerdown", () => { if (!soundUnlocked) unlock(); }, { once: false });
+
+function stopAll() {
+  for (const k in audio) { audio[k].pause(); if (audio[k].currentTime) audio[k].currentTime = 0; }
+  currentSong = null;
+}
+function play(name, { onEnd = () => {} } = {}) {
+  if (!soundUnlocked) { log("🔇 Sound blocked - tap 'Enable sound'"); return; }
+  stopAll();
+  const a = audio[name];
+  a.currentTime = 0;
+  const done = () => { currentSong = null; onEnd(); };
+  a.onended = done;
+  a.play().catch(() => { log("Playback blocked - tap enable sound"); });
+  currentSong = a;
+}
+
+/* ---------------- Structured sounds ----------------
+ * Fire sequences that mirror the real school day.
+ */
+function seq(list, i = 0) {
+  if (i >= list.length) return;
+  const [name, label] = list[i];
+  log("▶ " + label);
+  play(name, { onEnd: () => seq(list, i + 1) });
+}
+
+function playStartOfDay()  { log("🎵 Start of day");       seq([["bell", "school bell"], ["anthem", "national anthem"]]); }
+function playPeriodChime() { log("🔔 Period ended");       seq([["chimes", "westminster chimes"]]); }
+function playLunchEnd()    { log("🍚 Lunch over");          seq([["chimes", "westminster chimes"], ["bell", "school bell"]]); }
+function playEndOfDay()    { log("🏁 End of school");       seq([["bell", "school bell"]]); }
+function playPatriotic()   { log("🇲🇲 Patriotic song");      seq([["patriotic", "ဇာတိမာန် patriotic song"], ["bell", "school bell"]]); }
+
+/* ---------------- Schedule ----------------
+ * 8 periods, 45 min each. Lunch 12:00-12:30.
+ */
+const PERIODS = [
+  { n:1, start:{h:9, m:0},  end:{h:9, m:45} },
+  { n:2, start:{h:9, m:45}, end:{h:10, m:30} },
+  { n:3, start:{h:10, m:30},end:{h:11, m:15} },
+  { n:4, start:{h:11, m:15},end:{h:12, m:0} },
+  { n:5, start:{h:12, m:30},end:{h:13, m:15} },
+  { n:6, start:{h:13, m:15},end:{h:14, m:0} },
+  { n:7, start:{h:14, m:0}, end:{h:14, m:45} },
+  { n:8, start:{h:14, m:45},end:{h:15, m:0} }
+];
+const LUNCH = { start:{h:12, m:0}, end:{h:12, m:30} };
+
+const T = t => (t.h * 60 + t.m);
+const START_DAY = 8 * 60 + 55;   // 8:55  bell + anthem
+const PATRIOTIC = 14 * 60 + 50;  // 2:50  patriotic + bell
+const END_DAY   = 15 * 60;       // 3:00  end bell
+
+const m2str = m => {
+  const h = Math.floor(m / 60), mm = m % 60;
+  const amp = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return { h: h12, m: (mm < 10 ? "0" : "") + mm, amp };
 };
 
-const days = Object.keys(timetable);
-const daysEl = document.getElementById("days");
-const scheduleEl = document.getElementById("schedule");
+/* ---------------- Timetable data ---------------- */
+const timetable = {
+  "Monday":    [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["မြန်မာ","c-my"],["သင်္ချာ","c-math"],["သင်္ချာ","c-math"],["Cvics","c-civ"],["ပထဝီဝင်","c-geo"]],
+  "Tuesday":   [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Arts","c-art"],["သင်္ချာ","c-math"],["သိပ္ပံ","c-sci"],["ပထဝီဝင်","c-geo"]],
+  "Wednesday": [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Eng","c-eng"],["သင်္ချာ","c-math"],["Music","c-mus"],["ပထဝီဝင်","c-geo"]],
+  "Thursday":  [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["Eng","c-eng"],["Socials","c-soc"],["Humanitration","c-hum"],["ပထဝီဝင်","c-geo"]],
+  "Friday":    [["ပထဝီဝင်","c-geo"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["မြန်မာ","c-my"],["Eng","c-eng"],["မြန်မာ","c-my"],["သမိုင်း","c-hist"],["ပထဝီဝင်","c-geo"]]
+};
+const DAYS = Object.keys(timetable);
+const dayShort = { Monday:"Mon", Tuesday:"Tue", Wednesday:"Wed", Thursday:"Thu", Friday:"Fri" };
 
-const dayShort = { Monday: "Mon", Tuesday: "Tue", Wednesday: "Wed", Thursday: "Thu", Friday: "Fri" };
+/* ---------------- Clock (Myanmar Standard Time UTC+6:30) ---------------- */
+let simOffset = 0; // minutes added to real BST for testing
 
-let activeDay = days[new Date().getDay() - 1] || "Monday";
+function realNowMinute() {
+  const fmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Yangon", hour: "2-digit", minute: "2-digit",
+    hour12: false
+  });
+  const [hh, mm] = fmt.format(new Date()).split(":");
+  return (+hh % 24) * 60 + +mm;
+}
+function todayIndex() {
+  // 0=Mon..4=Fri, -1 weekend. Uses Asia/Yangon weekday.
+  const wd = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Yangon", weekday: "short" }).format(new Date());
+  const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4 };
+  return map[wd] !== undefined ? map[wd] : -1;
+}
+const nowMinute = () => (realNowMinute() + simOffset + 1440) % 1440;
+
+/* ---------------- Event engine ---------------- */
+let fired = {};
+function fireWhenDue() {
+  const m = nowMinute();
+  const dayIsSchool = todayIndex() >= 0;
+
+  const ev = [
+    { at: START_DAY, fn: playStartOfDay,  key: "start" },
+    { at: PATRIOTIC, fn: playPatriotic,   key: "patriotic" },
+    { at: END_DAY,   fn: playEndOfDay,    key: "end" }
+  ];
+  for (const p of PERIODS) {
+    ev.push({ at: T(p.end), fn: playPeriodChime, key: "endP" + p.n });
+  }
+  ev.push({ at: T(LUNCH.end), fn: playLunchEnd, key: "lunchEnd" });
+
+  if (!dayIsSchool) return;
+  for (const e of ev) {
+    if (m >= e.at && !fired[e.key]) { fired[e.key] = true; e.fn(); }
+  }
+}
+function resetFired() { fired = {}; }
+
+/* ---------------- Keystrokes: Shift+1..8 jump to a period ---------------- */
+document.addEventListener("keydown", e => {
+  if (e.shiftKey && e.key >= "1" && e.key <= "8") {
+    const idx = +e.key - 1;
+    jumpToPeriod(idx);
+  }
+});
+
+function jumpToPeriod(idx) {
+  const p = PERIODS[idx];
+  if (!p) return;
+  // Move simulated clock to the START of that period.
+  simOffset = T(p.start) - realNowMinute();
+  normalizeOffset();
+  resetFired();
+  document.getElementById("offsetRange").value = Math.max(-180, Math.min(180, simOffset));
+  refresh();
+
+  // Trigger the transition sound for /near/ this period.
+  const fire = [
+    playStartOfDay,            // Period 1 start:  bell + anthem
+    playPeriodChime,           // 9:45
+    playPeriodChime,           // 10:30
+    playPeriodChime,           // 11:15
+    playLunchEnd,              // 12:30 lunch end: chimes + bell
+    playPeriodChime,           // 13:15
+    playPeriodChime,           // 14:00
+    playPeriodChime            // 14:45
+  ];
+  fire[idx]();
+}
+
+/* ---------------- Render ---------------- */
+const DAY_EL = document.getElementById("days");
+const SCHED_EL = document.getElementById("schedule");
+
+function periodStatus(m) {
+  let state = "before", idx = -1;
+  if (m < START_DAY) return { state: "before-school", idx: -1 };
+  if (m >= END_DAY) return { state: "after-school", idx: -1 };
+
+  for (let i = 0; i < PERIODS.length; i++) {
+    if (m >= T(PERIODS[i].start) && m < T(PERIODS[i].end)) return { state: "in", idx: i };
+  }
+  if (m >= T(LUNCH.start) && m < T(LUNCH.end)) return { state: "lunch", idx: -1 };
+  // gaps between periods
+  if (m >= START_DAY && m < T(PERIODS[0].start)) return { state: "before-school", idx: -1 };
+  return { state: "gap", idx: -1 };
+}
 
 function render() {
-  daysEl.innerHTML = "";
-  scheduleEl.innerHTML = "";
+  DAY_EL.innerHTML = "";
+  SCHED_EL.innerHTML = "";
 
-  days.forEach(day => {
-    const btn = document.createElement("button");
-    btn.className = "day-btn" + (day === activeDay ? " active" : "");
-    btn.textContent = dayShort[day] || day;
-    btn.onclick = () => { activeDay = day; render(); };
-    daysEl.appendChild(btn);
+  const dayIdx = todayIndex();
+  const activeDayName = sessionStorage.getItem("activeDay") || (dayIdx >= 0 ? DAYS[dayIdx] : "Monday");
+
+  DAYS.forEach((day, i) => {
+    const b = document.createElement("button");
+    b.className = "day-btn" + (day === activeDayName ? " active" : "") + (i > 4 ? " weekend" : "");
+    b.textContent = dayShort[day] || day;
+    b.onclick = () => { sessionStorage.setItem("activeDay", day); render(); };
+    DAY_EL.appendChild(b);
   });
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "day-schedule active";
+  const m = nowMinute();
+  const st = periodStatus(m);
 
-  timetable[activeDay].forEach(item => {
-    const isBreak = item.period === "brk";
+  const wrapper = document.createElement("div");
+  wrapper.className = "schedule";
+
+  // Insert period-4 -> lunch -> period-5 marker
+  timetable[activeDayName].forEach((s, i) => {
+    const p = PERIODS[i];
+    if (i === 4) {
+      const lun = document.createElement("div");
+      lun.className = "card lunch";
+      lun.innerHTML = `
+        <div class="period-num"><span class="p">LUNCH</span><span class="t">12:00</span></div>
+        <div class="period-info"><span class="subject">&#127828; Break &middot; lunch</span><span class="end-time">12:30</span></div>`;
+      if (st.state === "lunch") lun.classList.add("current");
+      wrapper.appendChild(lun);
+    }
+
     const card = document.createElement("div");
-    card.className = "card" + (isBreak ? " break-card" : "");
+    card.className = "card" + (st.state === "in" && st.idx === i ? " current" : "");
+    const stT = m2str(T(p.start));
+    const enT = m2str(T(p.end));
     card.innerHTML = `
-      <div class="period-num">${isBreak ? "·" : "P" + item.period}</div>
+      <div class="period-num"><span class="p">P${p.n}</span><span class="t">${stT.h}:${stT.m}</span></div>
       <div class="period-info">
-        <span class="subject"><span class="dot ${item.cls}"></span>${item.subject}</span>
-      </div>
-    `;
+        <span class="subject"><span class="dot ${s[1]}" style="color:inherit"></span>${s[0]}</span>
+        <span class="end-time">${enT.h}:${enT.m} ${enT.amp}</span>
+      </div>`;
     wrapper.appendChild(card);
   });
 
-  scheduleEl.appendChild(wrapper);
+  SCHED_EL.appendChild(wrapper);
+
+  /* Now banner */
+  const banner = document.getElementById("nowBanner");
+  const label = m2str(m);
+  if (dayIdx < 0) {
+    banner.innerHTML = "It's the <b>weekend</b> &mdash; no classes. &#127780;";
+  } else {
+    let txt;
+    if (st.state === "before-school") {
+      txt = `School starts in <span class="gold">${Math.max(0, START_DAY - m)} min</span> &middot; next bell <b class="gold">8:55</b>`;
+    } else if (st.state === "in") {
+      const p = PERIODS[st.idx];
+      const left = T(p.end) - m;
+      txt = `<b>Period ${p.n}</b> in session &middot; ends in <span class="gold">${left} min</span>`;
+    } else if (st.state === "lunch") {
+      const left = T(LUNCH.end) - m;
+      txt = `&#127828; <b>Lunch break</b> &middot; back to class in <span class="gold">${left} min</span>`;
+    } else if (st.state === "after-school") {
+      txt = "School's out for the day! &#127881;";
+    } else {
+      txt = "Between periods &middot; chill &#9749;";
+    }
+    banner.innerHTML = txt + ` &nbsp;<span class="gold">(${label.h}:${label.m} ${label.amp})</span>`;
+  }
 }
 
-render();
-</script>
+function refreshClock() {
+  const m = nowMinute();
+  const lab = m2str(m);
+  document.getElementById("tH").textContent = lab.h;
+  document.getElementById("tM").textContent = lab.m;
+  document.getElementById("tA").textContent = lab.amp;
 
+  const i = todayIndex();
+  document.getElementById("tDay").textContent = i >= 0 ? DAYS[i] : "Weekend";
+  document.getElementById("simBadge").style.display = simOffset ? "block" : "none";
+  document.getElementById("offsetLbl").textContent = (simOffset > 0 ? "+" : "") + simOffset + " min";
+}
+
+function normalizeOffset() {
+  while (simOffset > 180) simOffset -= 1440;
+  while (simOffset < -180) simOffset += 1440;
+}
+
+function refresh() { render(); refreshClock(); fireWhenDue(); }
+
+/* ---------------- Controls ---------------- */
+// Keyboard period keys row
+const KBD = document.getElementById("kbdRow");
+for (let n = 1; n <= 8; n++) {
+  const k = document.createElement("button");
+  k.className = "kbd";
+  k.innerHTML = `P${n}<small>${PERIODS[n-1].start.h}:${String(PERIODS[n-1].start.m).padStart(2,"0")}</small>`;
+  k.onclick = () => jumpToPeriod(n - 1);
+  KBD.appendChild(k);
+}
+
+document.querySelectorAll(".sbtn").forEach(b => {
+  b.onclick = () => {
+    const s = b.dataset.sound;
+    if (s === "start") playStartOfDay();
+    else if (s === "anthem") seq([["anthem", "national anthem"]]);
+    else if (s === "chimes") playPeriodChime();
+    else if (s === "bell") playEndOfDay();
+    else if (s === "patriotic") playPatriotic();
+  };
+});
+
+const RANGE = document.getElementById("offsetRange");
+RANGE.oninput = () => { simOffset = +RANGE.value; resetFired(); refresh(); };
+
+document.getElementById("btnReal").onclick = () => { RANGE.value = 0; simOffset = 0; resetFired(); refresh(); };
+document.getElementById("btnNoon").onclick = () => { simOffset = T(LUNCH.end) - realNowMinute(); normalizeOffset(); RANGE.value = Math.max(-180,Math.min(180,simOffset)); resetFired(); refresh(); };
+document.getElementById("btnEnd").onclick = () => { simOffset = PATRIOTIC - realNowMinute(); normalizeOffset(); RANGE.value = Math.max(-180,Math.min(180,simOffset)); resetFired(); refresh(); playPatriotic(); };
+
+/* ---------------- Event log ---------------- */
+function log(msg) {
+  const el = document.getElementById("eventLog");
+  const stamp = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Yangon", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date());
+  el.textContent = `[${stamp}] ${msg}`;
+}
+
+/* ---------------- Loop ---------------- */
+refresh();
+setInterval(refresh, 1000);
+</script>
 </body>
 </html>
