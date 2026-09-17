@@ -1,592 +1,635 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>G6 Time Table</title>
+<title>G6 အချိန်ဇယား</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
   :root {
     --navy: #08131f;
-    --navy-2: #0c1f33;
-    --green-dark: #0e2a20;
-    --green: #1d4d38;
-    --green-bright: #35c47f;
+    --navy2: #0b2138;
+    --green-dk: #0b2016;
+    --green: #155230;
+    --green-br: #38d68a;
+    --green-sm: #2aa06a;
     --gold: #d4af37;
-    --gold-soft: #e6c15a;
-    --text: #e8f0ec;
-    --muted: #7fa58f;
-    --card: rgba(16,40,32,0.72);
-    --card-line: rgba(80,140,110,0.35);
-    --danger: #ef6a6a;
+    --gold-s: #f0d272;
+    --text: #ebf3ee;
+    --muted: #86a896;
+    --line: rgba(96,160,130,0.28);
+    --card: rgba(13,34,27,0.72);
   }
+
+  html, body { min-height:100%; }
 
   body {
-    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background:
-      radial-gradient(1200px 600px at 85% -10%, rgba(35,140,95,0.22), transparent 60%),
-      radial-gradient(900px 500px at 0% 110%, rgba(20,60,120,0.28), transparent 55%),
-      linear-gradient(160deg, var(--green-dark) 0%, var(--navy) 60%, var(--navy-2) 100%);
+    font-family: "Noto Sans Myanmar", "Padauk", "Myanmar Text", "Segoe UI", sans-serif;
     color: var(--text);
-    min-height: 100vh;
-    padding: 16px 16px 40px;
+    background:
+      radial-gradient(1000px 560px at 90% -10%, rgba(42,160,106,0.20), transparent 55%),
+      radial-gradient(900px 520px at -10% 110%, rgba(22,60,120,0.30), transparent 55%),
+      linear-gradient(155deg, var(--green-dk) 0%, var(--navy) 58%, var(--navy2) 100%);
+    background-attachment: fixed;
+    padding-bottom: 48px;
   }
 
-  .masthead { text-align:center; position:relative; padding-top: 8px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 16px 14px 0; }
 
+  /* ---------- Header ---------- */
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom: 12px;
+  }
+  .brand { display:flex; align-items:center; gap:12px; min-width:0; }
   .crest {
-    display:inline-flex; align-items:center; justify-content:center;
-    width: 58px; height: 58px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #1f5c40, var(--green-dark) 70%);
+    flex:0 0 auto; width:56px; height:56px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family: Georgia, serif; font-size:22px; font-weight:800; color: var(--gold-s);
+    background: radial-gradient(circle at 35% 28%, #21603f, var(--green-dk) 72%);
     border: 2px solid var(--gold);
-    box-shadow: 0 0 22px rgba(212,175,55,0.35), inset 0 0 14px rgba(0,0,0,0.5);
-    margin-bottom: 10px;
+    box-shadow: 0 0 20px rgba(212,175,55,0.35), inset 0 0 16px rgba(0,0,0,0.55);
+    cursor:pointer; user-select:none; transform: translateZ(0);
+    transition: transform .15s, box-shadow .15s;
+    animation: breath 3.5s ease-in-out infinite;
   }
-  .crest span { font-size: 24px; font-weight:800; color: var(--gold-soft); font-family: Georgia, serif; }
+  .crest:active { transform: scale(0.92); }
+  @keyframes breath { 0%,100%{ box-shadow:0 0 14px rgba(212,175,55,0.3), inset 0 0 16px rgba(0,0,0,0.55);} 50%{ box-shadow:0 0 26px rgba(212,175,55,0.55), inset 0 0 16px rgba(0,0,0,0.55);} }
 
-  h1 {
-    font-size: 1.35rem; font-weight: 800; letter-spacing: 0.14em;
-    color: var(--gold-soft); text-transform: uppercase; font-family: Georgia, serif;
+  .titles h1 {
+    font-size: 1.05rem; line-height:1.2; letter-spacing:.05em;
+    font-weight:800; color: var(--gold-s);
   }
-  .subtitle { font-size: 0.72rem; color: var(--muted); margin-top: 4px; letter-spacing: 0.05em; }
+  .titles .sub { font-size: 0.66rem; color: var(--muted); margin-top:2px; }
 
-  /* Clock */
-  .clock-panel {
-    margin: 18px auto 0; max-width: 420px;
-    background: linear-gradient(180deg, rgba(8,26,38,0.85), rgba(10,32,26,0.8));
-    border: 1px solid var(--card-line); border-radius: 16px;
-    padding: 12px 14px; display:flex; align-items:center; justify-content:space-between;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  .clock-box {
+    text-align:right; background: rgba(5,16,26,0.55);
+    border:1px solid var(--line); border-radius: 14px; padding: 8px 14px;
+    box-shadow: inset 0 0 18px rgba(0,0,0,0.4);
   }
-  .clock-read {
-    position: relative;
+  .clock-box .t {
+    font-size: 1.5rem; font-weight:800; line-height:1;
+    font-variant-numeric: tabular-nums; letter-spacing:.02em; font-family: "SF Mono","Cascadia Mono",Consolas,monospace;
   }
-  .clock-read .label { font-size: 0.6rem; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; }
-  .clock-read .time {
-    font-size: 2rem; font-weight: 700; line-height: 1.05; color: var(--text);
-    font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
-    font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
-  }
-  .clock-read .time .ampm { font-size: 0.9rem; color: var(--gold); margin-left: 2px; }
-  .clock-read .zone { font-size: 0.6rem; color: var(--muted); letter-spacing:0.1em; }
+  .clock-box .t small { font-size: .72rem; font-weight:600; color: var(--gold); margin-left:2px; }
+  .clock-box .meta { display:flex; justify-content:flex-end; gap:6px; margin-top:3px; }
+  .clock-box .m { font-size:.58rem; color: var(--muted); letter-spacing:.08em; }
+  .clock-box .d { font-size:.62rem; color: var(--gold-s); font-weight:700; }
 
-  .clock-status { text-align:right; }
-  .clock-status .dot {
-    display:inline-flex; align-items:center; gap:6px; font-size:0.7rem; color:var(--gold-soft);
-    border:1px solid rgba(212,175,55,0.4); padding:4px 9px; border-radius: 20px; background: rgba(212,175,55,0.08);
+  /* ---------- Status ---------- */
+  .statusbar {
+    margin-bottom: 12px; border-radius: 12px; padding: 10px 12px;
+    background: linear-gradient(90deg, rgba(21,82,48,0.5), rgba(11,33,56,0.6));
+    border:1px solid var(--line);
+    display:flex; align-items:center; gap:10px;
+    font-size: .84rem;
   }
-  .status-pip {
-    width:8px;height:8px;border-radius:50%;background:var(--gold-soft);
-    box-shadow:0 0 8px var(--gold); animation: pulse 1.6s infinite;
+  .statusbar .pip {
+    flex:0 0 auto; width:9px;height:9px;border-radius:50%;
+    background: var(--green-br); box-shadow: 0 0 10px var(--green-br); animation: pulse 1.7s infinite;
   }
-  .clock-status .sim { margin-top:6px; font-size:0.62rem; color:var(--danger); display:none; font-weight:600; letter-spacing:0.06em; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+  @keyframes pulse { 0%,100%{opacity:1} 45%{opacity:.2} }
+  .statusbar .txt b { color: var(--gold-s); }
+  .statusbar .led { margin-left:auto; font-size:.62rem; color: var(--gold); letter-spacing:.12em; display:none; }
+  .statusbar .led.on { display:inline-block; }
 
-  /* Now banner */
-  .now-banner {
-    margin: 12px auto 0; max-width: 420px; text-align:center;
-    background: rgba(30,86,60,0.35); border:1px solid var(--card-line);
-    padding:8px 12px; border-radius: 10px; font-size:0.82rem; color:var(--text);
-  }
-  .now-banner b { color: var(--green-bright); }
-  .now-banner .gold { color: var(--gold-soft); }
-
-  /* Day tabs */
+  /* ---------- Day pills ---------- */
   .days {
-    display:flex; gap:6px; overflow-x:auto; max-width: 420px; margin: 16px auto 0;
-    padding-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width:none;
+    display:flex; gap:8px; overflow-x:auto; margin-bottom: 12px;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
   .days::-webkit-scrollbar { display:none; }
-  .day-btn {
-    flex: 1 1 0; min-width: 60px; padding: 8px 8px; border-radius: 10px;
-    border: 1.5px solid var(--card-line); background: var(--card); color: var(--muted);
-    font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all .18s; text-transform: uppercase;
-    letter-spacing: 0.04em;
+  .pday {
+    flex:1 1 0; min-width:62px; padding:9px 6px; text-align:center;
+    border-radius: 11px; border:1.5px solid var(--line); background: var(--card);
+    color: var(--muted); font-weight:700; font-size:.82rem; cursor:pointer;
+    transition: all .18s; white-space:nowrap;
   }
-  .day-btn.active {
-    background: linear-gradient(160deg, var(--green), #123826);
-    border-color: var(--green-bright); color: #eafff5;
-    box-shadow: 0 0 14px rgba(53,196,127,0.35);
+  .pday.today { border-color: rgba(240,210,114,0.55); color: var(--gold-s); }
+  .pday.active {
+    background: linear-gradient(160deg, var(--green-sm), #0e3a26);
+    border-color: var(--green-br); color: #eafff5;
+    box-shadow: 0 0 16px rgba(56,214,138,0.35);
   }
-  .day-btn.weekend { opacity:0.45; }
 
-  /* Schedule */
-  .schedule { max-width: 420px; margin: 6px auto 0; display:flex; flex-direction:column; gap:8px; }
+  /* ---------- Mobile schedule ---------- */
+  .sched { display:flex; flex-direction:column; gap:9px; }
 
-  .card {
-    display:flex; align-items:stretch; border-radius: 12px; overflow:hidden;
-    background: var(--card); border: 1px solid var(--card-line);
-    transition: border-color .2s, box-shadow .2s, transform .2s;
+  .slot {
+    display:flex; align-items:stretch; border-radius: 14px; overflow:hidden;
+    background: var(--card); border:1px solid var(--line);
+    transition: border-color .2s, box-shadow .2s;
   }
-  .card.current {
+  .slot.lunch { border-style: dashed; background: rgba(7,26,17,0.6); }
+  .slot.live {
     border-color: var(--gold);
-    box-shadow: 0 0 0 1px var(--gold), 0 0 20px rgba(212,175,55,0.25);
+    box-shadow: 0 0 0 1px var(--gold), 0 0 24px rgba(212,175,55,0.28);
   }
-  .card.break-card { background: rgba(8,19,31,0.6); border-style: dashed; }
-  .card.lunch { border-color: rgba(212,175,55,0.5); }
-
-  .period-num {
-    width: 48px; min-width: 48px; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:1px; background: rgba(10,30,24,0.6); border-right: 1px solid var(--card-line);
+  .slot .rail {
+    width:52px; min-width:52px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; background: rgba(7,24,18,0.55); border-right:1px solid var(--line);
   }
-  .period-num .p { font-size: 0.62rem; font-weight: 800; color: var(--gold); letter-spacing:0.08em; }
-  .period-num .t { font-size: 0.52rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .card.lunch .period-num .p { color: var(--gold-soft); }
+  .slot .rail .p { font-size:.68rem; font-weight:800; color: var(--gold); writing-mode: vertical-rl; }
+  .slot.lunch .rail { background: rgba(40,20,5,0.35); }
+  .slot.lunch .rail .p { writing-mode:initial; font-size:.6rem; color: var(--gold-s); }
+  .slot .rail .wt { font-size:.58rem; color: var(--muted); }
+  .slot .body { flex:1; padding:11px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .slot .subject { font-size:.98rem; font-weight:700; display:flex; align-items:center; }
+  .slot .subwait { font-size:.5rem; color: var(--gold); }
+  .slot .range { text-align:right; }
+  .slot .range .to { font-size:.68rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space:nowrap; }
+  .slot .range .tag { font-size:.56rem; color: var(--gold); }
+  .slot.lunch .subject { color: var(--muted); font-weight:600; font-size:.85rem; }
 
-  .period-info { flex:1; padding: 10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-  .subject { font-size: 0.95rem; font-weight: 600; color: var(--text); display:flex; align-items:center; }
-  .dot { width:9px; height:9px; border-radius:50%; margin-right:8px; flex-shrink:0; box-shadow: 0 0 8px currentColor; }
-  .end-time { font-size: 0.62rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dot { width:10px; height:10px; border-radius:50%; margin-right:9px; flex-shrink:0; box-shadow: 0 0 9px currentColor; }
 
-  .card.break-card .subject { font-style: italic; color: var(--muted); font-weight:500; font-size: 0.8rem; }
-  .card.break-card .end-time { color: var(--gold); }
+  .c-geo{color:#f0a04b}.c-hist{color:#ef6a6a}.c-sci{color:#52e8a2}.c-my{color:#c3a9ff}
+  .c-math{color:#5fb2ff}.c-eng{color:#4fd2e0}.c-art{color:#ff8ec9}.c-civ{color:#ffa457}
+  .c-mus{color:#d9a4ff}.c-soc{color:#62e3b0}.c-hum{color:#ffcf5e}
 
-  /* Subject colours */
-  .c-geo   { color:#f59e0b; } .c-hist { color:#ef6a6a; } .c-sci  { color:#35c47f; }
-  .c-my    { color:#a78bfa; } .c-math { color:#4aa0ff; } .c-eng  { color:#2ec7d8; }
-  .c-art   { color:#f472b6; } .c-civ  { color:#fb923c; } .c-mus  { color:#c084fc; }
-  .c-soc   { color:#34d399; } .c-hum  { color:#fbbf24; } .c-brk  { color:#7fa58f; }
+  /* ---------- Desktop week ---------- */
+  .week-panel { display:none; }
+  @media (min-width: 900px) {
+    .week-panel { display:block; }
+    .mobile-only { display:none; }
+  }
+  table.week { width:100%; border-collapse:separate; border-spacing:6px; table-layout:fixed; }
+  table.week th, table.week td { border-radius:10px; }
+  table.week thead th {
+    padding:9px 4px; font-size:.78rem; background: rgba(8,24,17,0.7);
+    border:1px solid var(--line); color: var(--gold-s); font-weight:800;
+  }
+  table.week thead th.col { color: var(--muted); font-weight:700; }
+  table.week thead th.hd { color: var(--gold-s); }
+  table.week td {
+    padding:9px 7px; text-align:center; vertical-align:middle;
+    background: var(--card); border:1px solid var(--line); font-size:.8rem; line-height:1.4;
+  }
+  table.week td.pn { background: rgba(7,24,18,0.5); color: var(--gold); font-weight:800; font-size:.7rem; white-space:nowrap; }
+  table.week td.lunch { border-style:dashed; background: rgba(40,20,5,0.28); color: var(--muted); font-weight:700; }
+  table.week td.now { border:1.5px solid var(--gold); box-shadow: 0 0 14px rgba(212,175,55,0.25); }
+  table.week td.todaycol { background: rgba(21,82,48,0.28); }
+  table.week td .dot { width:8px; height:8px; margin-right:6px; }
+  table.week td .tm { display:block; font-size:.58rem; color: var(--muted); line-height:1.1; }
+  table.week td .sb { display:flex; align-items:center; justify-content:center; font-weight:700; }
 
-  /* Test panel */
+  /* ---------- Test panel ---------- */
   .test-panel {
-    max-width: 420px; margin: 20px auto 0;
-    background: rgba(8,19,31,0.7); border: 1px solid var(--card-line); border-radius: 14px; padding: 14px;
+    margin-top: 16px; border-radius: 16px; padding: 16px;
+    background: linear-gradient(180deg, rgba(8,26,19,0.92), rgba(7,18,30,0.94));
+    border:1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   }
-  .test-panel .head {
-    display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px;
+  .test-panel[hidden] { display:none; }
+  .tp-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .tp-head h2 { font-size:.9rem; color: var(--gold-s); letter-spacing:.12em; font-weight:800; }
+  .tp-head .close {
+    border:1px solid var(--line); background:none; color:var(--muted); width:30px;height:30px;
+    border-radius:8px; font-size:.9rem; cursor:pointer;
   }
-  .test-panel .head h2 { font-size: 0.78rem; letter-spacing: 0.16em; color: var(--gold-soft); text-transform: uppercase; font-family: Georgia, serif; }
-  .test-panel .head .hint { font-size: 0.62rem; color: var(--muted); }
+  .tp-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  @media (min-width:600px){ .tp-grid{ grid-template-columns:repeat(8,1fr);} }
+  .pbtn {
+    padding:9px 4px; border-radius:10px; border:1px solid var(--line);
+    background: var(--card); color: var(--text); font-weight:700; font-size:.78rem;
+    cursor:pointer; transition:all .15s;
+  }
+  .pbtn small { display:block; font-size:.58rem; color: var(--muted); font-weight:500; }
+  .pbtn:active { background: var(--green); border-color: var(--green-br); transform:scale(.95); }
 
-  .kbd-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom: 12px; }
-  .kbd {
-    flex:1; min-width: 42px; text-align:center; padding: 7px 4px; border-radius: 8px;
-    background: var(--navy-2); border:1px solid var(--card-line); color: var(--text);
-    font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all .15s;
-  }
-  .kbd small { display:block; font-size: 0.55rem; color: var(--muted); font-weight: 500; }
-  .kbd:active { background: var(--green); border-color: var(--green-bright); }
-
-  .sound-btns { display:flex; gap:6px; flex-wrap:wrap; }
+  .s-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top: 12px; }
   .sbtn {
-    flex:1; min-width:110px; padding: 9px 8px; border-radius: 9px; border:1px solid var(--card-line);
-    background: var(--card); color: var(--text); font-size: 0.74rem; font-weight:600; cursor:pointer; transition: all .15s;
-    display:flex; align-items:center; justify-content:center; gap:6px;
+    flex:1; min-width:112px; padding:11px 8px; border-radius:11px;
+    border:1px solid var(--line); background: var(--card); color: var(--text);
+    font-size:.8rem; font-weight:700; cursor:pointer; transition:all .15s;
+    display:flex; align-items:center; justify-content:center; gap:7px;
   }
-  .sbtn .ic { color: var(--gold); }
-  .sbtn:active { background: var(--green); border-color: var(--green-bright); transform: scale(0.97); }
+  .sbtn .ic { font-size:1rem; }
+  .sbtn:active { background: var(--green); border-color: var(--green-br); transform:scale(.96); }
 
-  .timer-row { margin-top: 12px; }
-  .timer-row .lbl { display:flex; justify-content:space-between; font-size: 0.68rem; color: var(--muted); margin-bottom:6px; }
-  .timer-row .lbl b { color: var(--gold-soft); font-variant-numeric: tabular-nums; }
-  .range { width: 100%; accent-color: var(--green-bright); }
-  .timer-reset { margin-top: 10px; display:flex; gap:8px; }
+  .timer-row { margin-top:14px; }
+  .timer-row .lbl { display:flex; justify-content:space-between; font-size:.68rem; color: var(--muted); margin-bottom:6px; }
+  .timer-row .lbl b { color: var(--gold-s); }
+  .range { width:100%; accent-color: var(--green-br); }
+  .mini-row { display:flex; gap:8px; margin-top:10px; }
   .mini {
-    flex:1; padding: 8px; border-radius: 8px; border:1px solid var(--card-line); background: rgba(255,255,255,0.03);
-    color: var(--text); font-size: 0.72rem; cursor:pointer;
+    flex:1; padding:9px; border-radius:9px; border:1px solid var(--line);
+    background: rgba(255,255,255,0.03); color:var(--text); font-size:.74rem; cursor:pointer; font-weight:600;
+  }
+  .mini:active { background: var(--green); }
+  .tp-hint { margin-top:12px; font-size:.62rem; color:var(--muted); line-height:1.6; }
+
+  /* ---------- Toast / log ---------- */
+  .toast {
+    max-width: 400px; margin:14px auto 0; text-align:center;
+    color: var(--muted); font-size:.74rem; min-height:20px;
   }
 
-  /* Event log */
-  .event-log { max-width: 420px; margin: 14px auto 0; }
-  .event-log h2 { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
-  .event-log .log { font-size: 0.7rem; color: var(--muted); min-height: 18px; }
+  footer { text-align:center; margin-top:18px; font-size:.62rem; color:var(--muted); letter-spacing:.06em; }
 
-  /* Sound unlock */
+  /* ---------- Unlock ---------- */
   #unlock {
-    position: fixed; left:50%; bottom:16px; transform: translateX(-50%);
-    background: linear-gradient(160deg, var(--gold), #b8912a); color: #142014;
-    border: none; border-radius: 30px; padding: 12px 22px; font-size: 0.85rem; font-weight: 800;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.45); cursor: pointer; z-index: 50; display:none;
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+    background: linear-gradient(160deg, var(--gold), #b8912a); color:#131f18;
+    border:none; border-radius:30px; padding:13px 24px; font-size:.88rem; font-weight:800;
+    font-family: inherit; box-shadow:0 8px 26px rgba(0,0,0,.5); cursor:pointer; z-index:60; display:none;
   }
 
-  footer { text-align:center; padding: 26px 0 8px; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.08em; }
-
-  @media (min-width: 560px) {
-    body { padding: 24px 24px 48px; }
+  @media (min-width:900px) {
+    .days { justify-content:center; }
   }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="masthead">
-  <div class="crest"><span>G6</span></div>
-  <h1>Time Table</h1>
-  <p class="subtitle">Grade 6 &middot; Myanmar Standard Time</p>
+  <header>
+    <div class="brand">
+      <div class="crest" id="crest" title="စမ်းသပ်ကိရိယာဖွင့်ရန်">G6</div>
+      <div class="titles">
+        <h1>G6 အချိန်ဇယား</h1>
+        <p class="sub">ဆဋ္ဌမတန်း &middot; မြန်မာစံတော်ချိန်</p>
+      </div>
+    </div>
+    <div class="clock-box">
+      <div class="t"><span id="clkH">--</span>:<span id="clkM">--</span><small id="clkMer"></small></div>
+      <div class="meta"><span class="m" id="clkZone">MST</span><span class="d" id="clkDay">—</span></div>
+    </div>
+  </header>
+
+  <div class="statusbar">
+    <span class="pip"></span>
+    <span class="txt" id="statusTxt">…</span>
+    <span class="led" id="simLed">⏱ စမ်းသပ်အချိန်</span>
+  </div>
+
+  <!-- day pills -->
+  <nav class="days" id="days"></nav>
+
+  <!-- mobile portrait schedule -->
+  <div class="sched mobile-only" id="sched"></div>
+
+  <!-- desktop full-week table -->
+  <div class="week-panel" id="weekPanel"></div>
+
+  <!-- test console (hidden) -->
+  <section class="test-panel" id="testPanel" hidden>
+    <div class="tp-head">
+      <h2>🔧 စမ်းသပ်ကိရိယာ</h2>
+      <button class="close" id="closeTest" title="ပိတ်မည်">✕</button>
+    </div>
+
+    <div class="tp-grid" id="tpGrid"></div>
+
+    <div class="s-btns">
+      <button class="sbtn" data-sound="start"><span class="ic">🔔</span> ကျောင်းစ</button>
+      <button class="sbtn" data-sound="anthem"><span class="ic">🎵</span> နိုင်ငံတော်သီချင်း</button>
+      <button class="sbtn" data-sound="chimes"><span class="ic">⏰</span> နာရီသံ</button>
+      <button class="sbtn" data-sound="bell"><span class="ic">🔔</span> ခေါင်းလောင်း</button>
+      <button class="sbtn" data-sound="patriotic"><span class="ic">🇲🇲</span> ဇာတိမာန်သီချင်း</button>
+    </div>
+
+    <div class="timer-row">
+      <div class="lbl"><span>⏱ အချိန်ရွှေ့ပြောင်းမှု (မိနစ်)</span><b id="offLbl">+0</b></div>
+      <input type="range" class="range" id="offRange" min="-180" max="180" step="5" value="0">
+    </div>
+    <div class="mini-row">
+      <button class="mini" id="mReal">လက်ရှိအချိန်</button>
+      <button class="mini" id="mLunchS">နေ့လည် ၁၂:၀၀</button>
+      <button class="mini" id="mLunchE">နေ့လည် ၁၂:၃၀</button>
+      <button class="mini" id="mEnd">နေ့လည် ၃:၀၀</button>
+    </div>
+    <div class="tp-hint">
+      🖱 ကွန်ပျူတာ: <b>Shift + Alt + 1</b> ဖွင့်/ပိတ် &middot; <b>Shift + 1…8</b> စာချိန်ခုန်ကျော်
+      &middot; 📱 ဖုန်း: G6 လိုဂိုကို နှိပ်ပါ။
+    </div>
+  </section>
+
+  <div class="toast" id="toast">ခေါင်းလောင်းမမြည်သေးပါ</div>
+
+  <footer>G6 အချိန်ဇယား · မြန်မာစံတော်ချိန် · ၂၀၂၆</footer>
 </div>
 
-<div class="clock-panel">
-  <div class="clock-read">
-    <div class="label">Current Time</div>
-    <div class="time"><span id="tH">--</span>:<span id="tM">--</span><span class="ampm" id="tA"></span></div>
-    <div class="zone">Asia/Yangon (UTC+6:30)</div>
-  </div>
-  <div class="clock-status">
-    <div class="dot"><span class="status-pip"></span><span id="tDay">--</span></div>
-    <div class="sim" id="simBadge">SIMULATED TIME</div>
-  </div>
-</div>
-
-<div class="now-banner" id="nowBanner">Loading&hellip;</div>
-
-<div class="days" id="days"></div>
-
-<div class="schedule" id="schedule"></div>
-
-<div class="test-panel">
-  <div class="head">
-    <h2>Test Console</h2>
-    <span class="hint">Shift + 1&ndash;8</span>
-  </div>
-  <div class="kbd-row" id="kbdRow"></div>
-  <div class="sound-btns">
-    <button class="sbtn" data-sound="start"><span class="ic">&#9654;</span> Start bell</button>
-    <button class="sbtn" data-sound="anthem"><span class="ic">&#127925;</span> Anthem</button>
-    <button class="sbtn" data-sound="chimes"><span class="ic">&#128339;</span> Chimes</button>
-    <button class="sbtn" data-sound="bell"><span class="ic">&#128276;</span> School bell</button>
-    <button class="sbtn" data-sound="patriotic"><span class="ic">&#128127;</span> Patriotic</button>
-  </div>
-  <div class="timer-row">
-    <div class="lbl"><span>Simulate time offset (minutes)</span><b id="offsetLbl">+0</b></div>
-    <input type="range" class="range" id="offsetRange" min="-180" max="180" step="5" value="0">
-  </div>
-  <div class="timer-reset">
-    <button class="mini" id="btnReal">Back to real time</button>
-    <button class="mini" id="btnNoon">Jump to 12:30 (lunch end)</button>
-    <button class="mini" id="btnEnd">Jump to 2:50 (patriotic)</button>
-  </div>
-</div>
-
-<div class="event-log">
-  <h2>Event Log</h2>
-  <div class="log" id="eventLog">No bells yet.</div>
-</div>
-
-<footer>G6 Timetable &middot; sounds at bell times &middot; updated Sep 2026</footer>
-
-<button id="unlock">&#128276; Enable sound</button>
+<button id="unlock">🔔 အသံဖွင့်ရန် နှိပ်ပါ</button>
 
 <script>
 "use strict";
 
 /* ---------------- Audio ---------------- */
 const SOUNDS = {
-  anthem:     "audio/anthem.mp3",
-  patriotic:  "audio/patriotic.mp3",
-  chimes:     "audio/westminster.mp3",
-  bell:       "audio/bell.mp3"
+  anthem:    "audio/anthem.mp3",
+  patriotic: "audio/patriotic.mp3",
+  chimes:    "audio/westminster.mp3",
+  bell:      "audio/bell.mp3"
 };
 const audio = {};
-for (const k in SOUNDS) {
-  audio[k] = new Audio(SOUNDS[k]);
-  audio[k].preload = "auto";
-}
-let soundUnlocked = false;
-let currentSong = null;
+for (const k in SOUNDS) { audio[k] = new Audio(SOUNDS[k]); audio[k].preload = "auto"; }
+let unlocked = false;
 
-function unlock() {
-  soundUnlocked = true;
+function doUnlock() {
+  unlocked = true;
   document.getElementById("unlock").style.display = "none";
   for (const k in audio) {
     const p = audio[k].play();
     if (p !== undefined) p.then(() => audio[k].pause()).catch(() => {});
   }
 }
-document.getElementById("unlock").onclick = unlock;
-document.addEventListener("pointerdown", () => { if (!soundUnlocked) unlock(); }, { once: false });
+document.getElementById("unlock").onclick = doUnlock;
+document.addEventListener("pointerdown", () => { if (!unlocked) doUnlock(); });
 
-function stopAll() {
-  for (const k in audio) { audio[k].pause(); if (audio[k].currentTime) audio[k].currentTime = 0; }
-  currentSong = null;
-}
-function play(name, { onEnd = () => {} } = {}) {
-  if (!soundUnlocked) { log("🔇 Sound blocked - tap 'Enable sound'"); return; }
+function stopAll() { for (const k in audio) { audio[k].pause(); audio[k].currentTime = 0; } }
+function play(name, onEnd) {
+  if (!unlocked) { toast("🔇 အသံဖွင့်ရန် နှိပ်ပါ"); return; }
   stopAll();
   const a = audio[name];
   a.currentTime = 0;
-  const done = () => { currentSong = null; onEnd(); };
-  a.onended = done;
-  a.play().catch(() => { log("Playback blocked - tap enable sound"); });
-  currentSong = a;
+  a.onended = () => { if (onEnd) onEnd(); };
+  a.play().catch(() => toast("🔇 အသံဖွင့်ရန် နှိပ်ပါ"));
 }
-
-/* ---------------- Structured sounds ----------------
- * Fire sequences that mirror the real school day.
- */
 function seq(list, i = 0) {
   if (i >= list.length) return;
   const [name, label] = list[i];
-  log("▶ " + label);
-  play(name, { onEnd: () => seq(list, i + 1) });
+  toast("♪ " + label);
+  play(name, () => seq(list, i + 1));
 }
 
-function playStartOfDay()  { log("🎵 Start of day");       seq([["bell", "school bell"], ["anthem", "national anthem"]]); }
-function playPeriodChime() { log("🔔 Period ended");       seq([["chimes", "westminster chimes"]]); }
-function playLunchEnd()    { log("🍚 Lunch over");          seq([["chimes", "westminster chimes"], ["bell", "school bell"]]); }
-function playEndOfDay()    { log("🏁 End of school");       seq([["bell", "school bell"]]); }
-function playPatriotic()   { log("🇲🇲 Patriotic song");      seq([["patriotic", "ဇာတိမာန် patriotic song"], ["bell", "school bell"]]); }
+/* bell → anthem → bell  (school start) */
+function playStartOfDay()  { seq([["bell","ခေါင်းလောင်း"],["anthem","နိုင်ငံတော်သီချင်း"],["bell","စတင်ရန်ခေါင်းလောင်း"]]); }
+function playChimes()      { seq([["chimes","နာရီသံ"]]); }
+function playLunchBell()   { seq([["bell","နားချိန်ခေါင်းလောင်း"]]); }
+/* bell → bell → patriotic → bell  (school end) */
+function playEndOfDay()    { seq([["bell","ခေါင်းလောင်း"],["bell","ခေါင်းလောင်း"],["patriotic","ဇာတိမာန်သီချင်း"],["bell","ခေါင်းလောင်း"]]); }
 
-/* ---------------- Schedule ----------------
- * 8 periods, 45 min each. Lunch 12:00-12:30.
- */
+/* ---------------- Times ---------------- */
 const PERIODS = [
-  { n:1, start:{h:9, m:0},  end:{h:9, m:45} },
-  { n:2, start:{h:9, m:45}, end:{h:10, m:30} },
-  { n:3, start:{h:10, m:30},end:{h:11, m:15} },
-  { n:4, start:{h:11, m:15},end:{h:12, m:0} },
-  { n:5, start:{h:12, m:30},end:{h:13, m:15} },
-  { n:6, start:{h:13, m:15},end:{h:14, m:0} },
-  { n:7, start:{h:14, m:0}, end:{h:14, m:45} },
-  { n:8, start:{h:14, m:45},end:{h:15, m:0} }
+  { n:1, s:540, e:585 },  // 9:00-9:45
+  { n:2, s:585, e:630 },  // 9:45-10:30
+  { n:3, s:630, e:660 },  // 10:30-11:00
+  { n:4, s:660, e:690 },  // 11:00-11:30
+  { n:5, s:690, e:720 },  // 11:30-12:00
+  { n:6, s:750, e:795 },  // 12:30-13:15
+  { n:7, s:795, e:870 },  // 13:15-14:30
+  { n:8, s:870, e:900 }   // 14:30-15:00
 ];
-const LUNCH = { start:{h:12, m:0}, end:{h:12, m:30} };
+const LUNCH = { s:720, e:750 };  // 12:00-12:30
+const START_DAY = 8*60+55;       // 8:55
+const END_DAY = 900;             // 15:00
 
-const T = t => (t.h * 60 + t.m);
-const START_DAY = 8 * 60 + 55;   // 8:55  bell + anthem
-const PATRIOTIC = 14 * 60 + 50;  // 2:50  patriotic + bell
-const END_DAY   = 15 * 60;       // 3:00  end bell
+const ORD = ["ပထမ","ဒုတိယ","တတိယ","စတုတ္ထ","ပဉ္စမ","ဆဋ္ဌမ","သတ္တမ","အဋ္ဌမ"];
+const MYDAYS = ["တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ"];
 
-const m2str = m => {
-  const h = Math.floor(m / 60), mm = m % 60;
-  const amp = h >= 12 ? "PM" : "AM";
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return { h: h12, m: (mm < 10 ? "0" : "") + mm, amp };
+function fmt(m) { const h=Math.floor(m/60), mm=m%60; return h+":"+String(mm).padStart(2,"0"); }
+function mer(m) { const h=Math.floor(m/60); return h<12?"နံနက်":(h<18?"ညနေ":"ည"); }
+
+/* ---------------- Data ---------------- */
+const TIMETABLE = {
+  "တနင်္လာ":    [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["မြန်မာ","c-my"],["သင်္ချာ","c-math"],["သင်္ချာ","c-math"],["Cvics","c-civ"],["ပထဝီဝင်","c-geo"]],
+  "အင်္ဂါ":      [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Arts","c-art"],["သင်္ချာ","c-math"],["သိပ္ပံ","c-sci"],["ပထဝီဝင်","c-geo"]],
+  "ဗုဒ္ဓဟူး":    [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Eng","c-eng"],["သင်္ချာ","c-math"],["Music","c-mus"],["ပထဝီဝင်","c-geo"]],
+  "ကြာသပတေး":  [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["Eng","c-eng"],["Socials","c-soc"],["Humanitration","c-hum"],["ပထဝီဝင်","c-geo"]],
+  "သောကြာ":     [["ပထဝီဝင်","c-geo"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["မြန်မာ","c-my"],["Eng","c-eng"],["မြန်မာ","c-my"],["သမိုင်း","c-hist"],["ပထဝီဝင်","c-geo"]]
 };
+const DAYLIST = Object.keys(TIMETABLE);
 
-/* ---------------- Timetable data ---------------- */
-const timetable = {
-  "Monday":    [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["မြန်မာ","c-my"],["သင်္ချာ","c-math"],["သင်္ချာ","c-math"],["Cvics","c-civ"],["ပထဝီဝင်","c-geo"]],
-  "Tuesday":   [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Arts","c-art"],["သင်္ချာ","c-math"],["သိပ္ပံ","c-sci"],["ပထဝီဝင်","c-geo"]],
-  "Wednesday": [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Eng","c-eng"],["သင်္ချာ","c-math"],["Music","c-mus"],["ပထဝီဝင်","c-geo"]],
-  "Thursday":  [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["Eng","c-eng"],["Socials","c-soc"],["Humanitration","c-hum"],["ပထဝီဝင်","c-geo"]],
-  "Friday":    [["ပထဝီဝင်","c-geo"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["မြန်မာ","c-my"],["Eng","c-eng"],["မြန်မာ","c-my"],["သမိုင်း","c-hist"],["ပထဝီဝင်","c-geo"]]
-};
-const DAYS = Object.keys(timetable);
-const dayShort = { Monday:"Mon", Tuesday:"Tue", Wednesday:"Wed", Thursday:"Thu", Friday:"Fri" };
+/* ---------------- Clock (Myanmar Standard Time) ---------------- */
+let simOffset = 0;
 
-/* ---------------- Clock (Myanmar Standard Time UTC+6:30) ---------------- */
-let simOffset = 0; // minutes added to real BST for testing
-
-function realNowMinute() {
-  const fmt = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Yangon", hour: "2-digit", minute: "2-digit",
-    hour12: false
-  });
-  const [hh, mm] = fmt.format(new Date()).split(":");
-  return (+hh % 24) * 60 + +mm;
+function realNow() {
+  const fmt = new Intl.DateTimeFormat("en-GB", { timeZone:"Asia/Yangon", hour:"2-digit", minute:"2-digit", hour12:false });
+  const [hh,mm] = fmt.format(new Date()).split(":");
+  return (+hh % 24)*60 + +mm;
 }
-function todayIndex() {
-  // 0=Mon..4=Fri, -1 weekend. Uses Asia/Yangon weekday.
-  const wd = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Yangon", weekday: "short" }).format(new Date());
+function todayIdx() {
   const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4 };
+  const wd = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Yangon",weekday:"short"}).format(new Date());
   return map[wd] !== undefined ? map[wd] : -1;
 }
-const nowMinute = () => (realNowMinute() + simOffset + 1440) % 1440;
+const nowMin = () => ((realNow() + simOffset) % 1440 + 1440) % 1440;
+
+/* ---------------- Status logic ---------------- */
+function classify(m) {
+  if (m < START_DAY) return { k:"before" };
+  for (let i=0;i<PERIODS.length;i++){ if (m>=PERIODS[i].s && m<PERIODS[i].e) return { k:"in", i }; }
+  if (m>=LUNCH.s && m<LUNCH.e) return { k:"lunch" };
+  if (m>=END_DAY) return { k:"after" };
+  return { k:"gap" };
+}
 
 /* ---------------- Event engine ---------------- */
 let fired = {};
-function fireWhenDue() {
-  const m = nowMinute();
-  const dayIsSchool = todayIndex() >= 0;
 
-  const ev = [
-    { at: START_DAY, fn: playStartOfDay,  key: "start" },
-    { at: PATRIOTIC, fn: playPatriotic,   key: "patriotic" },
-    { at: END_DAY,   fn: playEndOfDay,    key: "end" }
-  ];
-  for (const p of PERIODS) {
-    ev.push({ at: T(p.end), fn: playPeriodChime, key: "endP" + p.n });
-  }
-  ev.push({ at: T(LUNCH.end), fn: playLunchEnd, key: "lunchEnd" });
+const EVENTS = [
+  { at:START_DAY, key:"start",  fn:playStartOfDay },
+  { at:585, key:"e1", fn:playChimes },
+  { at:630, key:"e2", fn:playChimes },
+  { at:660, key:"e3", fn:playChimes },
+  { at:690, key:"e4", fn:playChimes },
+  { at:720, key:"ls", fn:playLunchBell },
+  { at:750, key:"le", fn:playLunchBell },
+  { at:795, key:"e6", fn:playChimes },
+  { at:870, key:"e7", fn:playChimes },
+  { at:900, key:"end", fn:playEndOfDay }
+];
 
-  if (!dayIsSchool) return;
-  for (const e of ev) {
+function fireDue() {
+  if (todayIdx() < 0) return;               // weekend: silent
+  const m = nowMin();
+  for (const e of EVENTS) {
     if (m >= e.at && !fired[e.key]) { fired[e.key] = true; e.fn(); }
   }
 }
 function resetFired() { fired = {}; }
 
-/* ---------------- Keystrokes: Shift+1..8 jump to a period ---------------- */
-document.addEventListener("keydown", e => {
-  if (e.shiftKey && e.key >= "1" && e.key <= "8") {
-    const idx = +e.key - 1;
-    jumpToPeriod(idx);
-  }
-});
-
-function jumpToPeriod(idx) {
-  const p = PERIODS[idx];
-  if (!p) return;
-  // Move simulated clock to the START of that period.
-  simOffset = T(p.start) - realNowMinute();
-  normalizeOffset();
-  resetFired();
-  document.getElementById("offsetRange").value = Math.max(-180, Math.min(180, simOffset));
-  refresh();
-
-  // Trigger the transition sound for /near/ this period.
-  const fire = [
-    playStartOfDay,            // Period 1 start:  bell + anthem
-    playPeriodChime,           // 9:45
-    playPeriodChime,           // 10:30
-    playPeriodChime,           // 11:15
-    playLunchEnd,              // 12:30 lunch end: chimes + bell
-    playPeriodChime,           // 13:15
-    playPeriodChime,           // 14:00
-    playPeriodChime            // 14:45
-  ];
-  fire[idx]();
-}
-
 /* ---------------- Render ---------------- */
-const DAY_EL = document.getElementById("days");
-const SCHED_EL = document.getElementById("schedule");
-
-function periodStatus(m) {
-  let state = "before", idx = -1;
-  if (m < START_DAY) return { state: "before-school", idx: -1 };
-  if (m >= END_DAY) return { state: "after-school", idx: -1 };
-
-  for (let i = 0; i < PERIODS.length; i++) {
-    if (m >= T(PERIODS[i].start) && m < T(PERIODS[i].end)) return { state: "in", idx: i };
-  }
-  if (m >= T(LUNCH.start) && m < T(LUNCH.end)) return { state: "lunch", idx: -1 };
-  // gaps between periods
-  if (m >= START_DAY && m < T(PERIODS[0].start)) return { state: "before-school", idx: -1 };
-  return { state: "gap", idx: -1 };
-}
+const DAYS_EL = document.getElementById("days");
+const SCHED   = document.getElementById("sched");
+const PANEL   = document.getElementById("weekPanel");
 
 function render() {
-  DAY_EL.innerHTML = "";
-  SCHED_EL.innerHTML = "";
+  DAYS_EL.innerHTML = ""; SCHED.innerHTML = ""; PANEL.innerHTML = "";
 
-  const dayIdx = todayIndex();
-  const activeDayName = sessionStorage.getItem("activeDay") || (dayIdx >= 0 ? DAYS[dayIdx] : "Monday");
+  const tIdx = todayIdx();
+  let active = DAYLIST[tIdx];
+  const saved = sessionStorage.getItem("day");
+  if (saved && DAYLIST.includes(saved)) active = saved;
 
-  DAYS.forEach((day, i) => {
+  const m = nowMin();
+  const st = classify(m);
+  const school = tIdx >= 0;
+
+  /* day pills */
+  DAYLIST.forEach((d,i) => {
     const b = document.createElement("button");
-    b.className = "day-btn" + (day === activeDayName ? " active" : "") + (i > 4 ? " weekend" : "");
-    b.textContent = dayShort[day] || day;
-    b.onclick = () => { sessionStorage.setItem("activeDay", day); render(); };
-    DAY_EL.appendChild(b);
+    b.className = "pday" + (d===active?" active":"") + (i===tIdx?" today":"");
+    b.textContent = d;
+    b.onclick = () => { sessionStorage.setItem("day", d); render(); };
+    DAYS_EL.appendChild(b);
   });
 
-  const m = nowMinute();
-  const st = periodStatus(m);
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "schedule";
-
-  // Insert period-4 -> lunch -> period-5 marker
-  timetable[activeDayName].forEach((s, i) => {
-    const p = PERIODS[i];
-    if (i === 4) {
-      const lun = document.createElement("div");
-      lun.className = "card lunch";
-      lun.innerHTML = `
-        <div class="period-num"><span class="p">LUNCH</span><span class="t">12:00</span></div>
-        <div class="period-info"><span class="subject">&#127828; Break &middot; lunch</span><span class="end-time">12:30</span></div>`;
-      if (st.state === "lunch") lun.classList.add("current");
-      wrapper.appendChild(lun);
-    }
-
-    const card = document.createElement("div");
-    card.className = "card" + (st.state === "in" && st.idx === i ? " current" : "");
-    const stT = m2str(T(p.start));
-    const enT = m2str(T(p.end));
-    card.innerHTML = `
-      <div class="period-num"><span class="p">P${p.n}</span><span class="t">${stT.h}:${stT.m}</span></div>
-      <div class="period-info">
-        <span class="subject"><span class="dot ${s[1]}" style="color:inherit"></span>${s[0]}</span>
-        <span class="end-time">${enT.h}:${enT.m} ${enT.amp}</span>
-      </div>`;
-    wrapper.appendChild(card);
-  });
-
-  SCHED_EL.appendChild(wrapper);
-
-  /* Now banner */
-  const banner = document.getElementById("nowBanner");
-  const label = m2str(m);
-  if (dayIdx < 0) {
-    banner.innerHTML = "It's the <b>weekend</b> &mdash; no classes. &#127780;";
-  } else {
-    let txt;
-    if (st.state === "before-school") {
-      txt = `School starts in <span class="gold">${Math.max(0, START_DAY - m)} min</span> &middot; next bell <b class="gold">8:55</b>`;
-    } else if (st.state === "in") {
-      const p = PERIODS[st.idx];
-      const left = T(p.end) - m;
-      txt = `<b>Period ${p.n}</b> in session &middot; ends in <span class="gold">${left} min</span>`;
-    } else if (st.state === "lunch") {
-      const left = T(LUNCH.end) - m;
-      txt = `&#127828; <b>Lunch break</b> &middot; back to class in <span class="gold">${left} min</span>`;
-    } else if (st.state === "after-school") {
-      txt = "School's out for the day! &#127881;";
-    } else {
-      txt = "Between periods &middot; chill &#9749;";
-    }
-    banner.innerHTML = txt + ` &nbsp;<span class="gold">(${label.h}:${label.m} ${label.amp})</span>`;
+  /* status text */
+  const tb = document.getElementById("statusTxt");
+  const simLed = document.getElementById("simLed");
+  simLed.className = "led" + (simOffset ? " on" : "");
+  if (!school) tb.innerHTML = "ပိတ်ရက် ဖြစ်ပါသည် — စာချိန်မရှိပါ";
+  else if (st.k==="before") tb.innerHTML = "ကျောင်းမစသေးပါ · နောက်ခေါင်းလောင်း <b>" + fmt(START_DAY) + "</b>";
+  else if (st.k==="in") {
+    const p = PERIODS[st.i];
+    tb.innerHTML = "စာချိန် <b>" + ORD[st.i] + "</b> သင်နေသည် · ဆုံး <b>" + fmt(p.e) + "</b>";
   }
+  else if (st.k==="lunch") tb.innerHTML = "<b>နေ့လည်စာ နားချိန်</b> · " + (LUNCH.e - m) + " မိနစ်အကြာ ပြန်တက်ရမည်";
+  else if (st.k==="after") tb.innerHTML = "ကျောင်းပြီးပါပြီ ✔";
+  else tb.innerHTML = "စာချိန်ကြားတွင် နားချိန်";
+
+  /* --- mobile schedule --- */
+  const subj = TIMETABLE[active];
+  for (let i=0;i<PERIODS.length;i++) {
+    if (i===5) { // lunch separator
+      const l = document.createElement("div");
+      l.className = "slot lunch" + (st.k==="lunch"?" live":"");
+      l.innerHTML = `<div class="rail"><span class="p">နေ့လည်စာ</span></div>
+        <div class="body"><span class="subject">🍚 နားချိန်</span>
+        <span class="range"><span class="to">${fmt(LUNCH.s)} – ${fmt(LUNCH.e)}</span></span></div>`;
+      SCHED.appendChild(l);
+    }
+    const p = PERIODS[i];
+    const [name,cls] = subj[i];
+    const slot = document.createElement("div");
+    slot.className = "slot" + (st.k==="in" && st.i===i ? " live" : "");
+    slot.innerHTML = `
+      <div class="rail"><span class="p">${ORD[i]}</span></div>
+      <div class="body">
+        <span class="subject"><span class="dot ${cls}"></span>${name}</span>
+        <span class="range">
+          <div class="tag">${mer(p.s)}</div>
+          <div class="to">${fmt(p.s)} – ${fmt(p.e)}</div>
+        </span>
+      </div>`;
+    SCHED.appendChild(slot);
+  }
+
+  /* --- desktop week table --- */
+  if (window.matchMedia("(min-width: 900px)").matches) renderWeek(tIdx, st, m);
 }
 
-function refreshClock() {
-  const m = nowMinute();
-  const lab = m2str(m);
-  document.getElementById("tH").textContent = lab.h;
-  document.getElementById("tM").textContent = lab.m;
-  document.getElementById("tA").textContent = lab.amp;
+function renderWeek(tIdx, st, m) {
+  const table = document.createElement("table");
+  table.className = "week";
+  let html = "<thead><tr><th class='hd'>ချိန်</th>";
+  DAYLIST.forEach(d => { html += `<th>${d}</th>`; });
+  html += "</tr></thead><tbody>";
 
-  const i = todayIndex();
-  document.getElementById("tDay").textContent = i >= 0 ? DAYS[i] : "Weekend";
-  document.getElementById("simBadge").style.display = simOffset ? "block" : "none";
-  document.getElementById("offsetLbl").textContent = (simOffset > 0 ? "+" : "") + simOffset + " min";
+  for (let i=0;i<PERIODS.length;i++) {
+    if (i===5) {
+      html += `<tr><td class="pn lunch">နေ့လည်စာ</td>`;
+      for (let c=0;c<5;c++) {
+        const odd = st.k==="lunch" && c===tIdx ? " now" : (c===tIdx?" todaycol":"");
+        html += `<td class="lunch${odd}">🍚 ၁၂:၀၀ – ၁၂:၃၀</td>`;
+      }
+      html += "</tr>";
+    }
+    const p = PERIODS[i];
+    html += `<tr><td class="pn">${ORD[i]}<br>${fmt(p.s)}</td>`;
+    for (let c=0;c<5;c++) {
+      const now = st.k==="in" && st.i===i && c===tIdx ? " now" : (c===tIdx?" todaycol":"");
+      const [name,cls] = TIMETABLE[DAYLIST[c]][i];
+      html += `<td class="${now}"><span class="sb"><span class="dot ${cls}"></span>${name}</span><span class="tm">${fmt(p.s)}–${fmt(p.e)}</span></td>`;
+    }
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  table.innerHTML = html;
+  PANEL.appendChild(table);
 }
 
-function normalizeOffset() {
-  while (simOffset > 180) simOffset -= 1440;
-  while (simOffset < -180) simOffset += 1440;
+/* ---------------- Test console ---------------- */
+const TEST = document.getElementById("testPanel");
+function showTest(on) { TEST.hidden = !on; }
+document.getElementById("crest").onclick = () => showTest(TEST.hidden);
+document.getElementById("closeTest").onclick = () => showTest(false);
+
+/* Shift+1..8 jump; Shift+Alt+1 toggle console */
+document.addEventListener("keydown", e => {
+  if (e.shiftKey && e.altKey && e.key === "1") { showTest(TEST.hidden); return; }
+  if (e.shiftKey && !e.altKey && e.key >= "1" && e.key <= "8") jumpTo(+e.key - 1);
+});
+
+function jumpTo(i) {
+  const p = PERIODS[i];
+  simOffset = p.s - realNow();
+  normalize();
+  document.getElementById("offRange").value = clamp(simOffset);
+  resetFired();
+  refresh();
+  const trig = [playStartOfDay, playChimes, playChimes, playChimes,
+                playChimes, playLunchBell, playChimes, playChimes];
+  trig[i]();
 }
 
-function refresh() { render(); refreshClock(); fireWhenDue(); }
-
-/* ---------------- Controls ---------------- */
-// Keyboard period keys row
-const KBD = document.getElementById("kbdRow");
-for (let n = 1; n <= 8; n++) {
-  const k = document.createElement("button");
-  k.className = "kbd";
-  k.innerHTML = `P${n}<small>${PERIODS[n-1].start.h}:${String(PERIODS[n-1].start.m).padStart(2,"0")}</small>`;
-  k.onclick = () => jumpToPeriod(n - 1);
-  KBD.appendChild(k);
+/* period jump buttons in console */
+const GRID = document.getElementById("tpGrid");
+for (let i=0;i<8;i++) {
+  const b = document.createElement("button");
+  b.className = "pbtn";
+  b.innerHTML = `${ORD[i]}<small>${fmt(PERIODS[i].s)}</small>`;
+  b.onclick = () => jumpTo(i);
+  GRID.appendChild(b);
 }
 
+/* sound buttons */
 document.querySelectorAll(".sbtn").forEach(b => {
   b.onclick = () => {
     const s = b.dataset.sound;
-    if (s === "start") playStartOfDay();
-    else if (s === "anthem") seq([["anthem", "national anthem"]]);
-    else if (s === "chimes") playPeriodChime();
-    else if (s === "bell") playEndOfDay();
-    else if (s === "patriotic") playPatriotic();
+    if (s==="start") playStartOfDay();
+    else if (s==="anthem") seq([["anthem","နိုင်ငံတော်သီချင်း"]]);
+    else if (s==="chimes") playChimes();
+    else if (s==="bell") playLunchBell();
+    else if (s==="patriotic") seq([["patriotic","ဇာတိမာန်သီချင်း"]]);
   };
 });
 
-const RANGE = document.getElementById("offsetRange");
-RANGE.oninput = () => { simOffset = +RANGE.value; resetFired(); refresh(); };
+/* time offset slider */
+const OFF = document.getElementById("offRange");
+OFF.oninput = () => { simOffset = +OFF.value; resetFired(); refresh(); };
+function clamp(v){ return Math.max(-180, Math.min(180, v)); }
+function normalize(){ while(simOffset>180) simOffset-=1440; while(simOffset<-180) simOffset+=1440; }
+function setSim(target, playNow) {
+  simOffset = target - realNow();
+  normalize();
+  OFF.value = clamp(simOffset);
+  resetFired(); refresh();
+  if (playNow) playNow();
+}
+document.getElementById("mReal").onclick = () => { OFF.value=0; simOffset=0; resetFired(); refresh(); };
+document.getElementById("mLunchS").onclick = () => setSim(720);
+document.getElementById("mLunchE").onclick = () => setSim(750);
+document.getElementById("mEnd").onclick   = () => setSim(900, playEndOfDay);
 
-document.getElementById("btnReal").onclick = () => { RANGE.value = 0; simOffset = 0; resetFired(); refresh(); };
-document.getElementById("btnNoon").onclick = () => { simOffset = T(LUNCH.end) - realNowMinute(); normalizeOffset(); RANGE.value = Math.max(-180,Math.min(180,simOffset)); resetFired(); refresh(); };
-document.getElementById("btnEnd").onclick = () => { simOffset = PATRIOTIC - realNowMinute(); normalizeOffset(); RANGE.value = Math.max(-180,Math.min(180,simOffset)); resetFired(); refresh(); playPatriotic(); };
+/* ---------------- Clock / toast / loop ---------------- */
+function refreshClock() {
+  const m = nowMin();
+  document.getElementById("clkH").textContent = Math.floor(m/60);
+  document.getElementById("clkM").textContent = String(m%60).padStart(2,"0");
+  document.getElementById("clkMer").textContent = " " + mer(m);
+  const i = todayIdx();
+  document.getElementById("clkDay").textContent = school ? MYDAYS[i] : "ပိတ်ရက်";
+  document.getElementById("offLbl").textContent = (simOffset>0?"+":"") + simOffset + " မိနစ်";
+}
+let schoolDay = false;
+function toast(msg) { document.getElementById("toast").textContent = msg; }
 
-/* ---------------- Event log ---------------- */
-function log(msg) {
-  const el = document.getElementById("eventLog");
-  const stamp = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Yangon", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date());
-  el.textContent = `[${stamp}] ${msg}`;
+const msgs = {
+  chimes:"⏰ နာရီသံ", bell:"🔔 ခေါင်းလောင်း", anthem:"🎵 နိုင်ငံတော်သီချင်း", patriotic:"🇲🇲 ဇာတိမာန်သီချင်း"
+};
+
+function refresh() {
+  schoolDay = todayIdx() >= 0;
+  refreshClock();
+  render();
+  fireDue();
 }
 
-/* ---------------- Loop ---------------- */
+window.addEventListener("resize", render);
+sessionStorage.removeItem("day");
 refresh();
 setInterval(refresh, 1000);
 </script>
