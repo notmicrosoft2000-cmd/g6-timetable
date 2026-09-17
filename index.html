@@ -22,6 +22,8 @@
     --card: #0e241c;
     --head: #0b1c26;
     --daycol: #0a1e16;
+    --subj: var(--gold);
+    --subj-soft: rgba(212,175,55,0.16);
   }
 
   html, body { min-height:100%; }
@@ -30,11 +32,13 @@
     font-family: "Noto Sans Myanmar", "Padauk", "Myanmar Text", "Segoe UI", sans-serif;
     color: var(--text);
     background:
+      radial-gradient(1000px 560px at 88% -12%, var(--subj-soft), transparent 55%),
       radial-gradient(1000px 560px at 90% -10%, rgba(42,160,106,0.18), transparent 55%),
       radial-gradient(900px 520px at -10% 110%, rgba(22,60,120,0.28), transparent 55%),
       linear-gradient(155deg, var(--green-dk) 0%, var(--navy) 58%, var(--navy2) 100%);
     background-attachment: fixed;
     padding-bottom: 48px;
+    transition: background 1s ease;
   }
 
   .wrap { max-width: 1200px; margin: 0 auto; padding: 16px 14px 0; }
@@ -46,17 +50,18 @@
   }
   .brand { display:flex; align-items:center; gap:12px; min-width:0; }
   .crest {
-    flex:0 0 auto; width:56px; height:56px; border-radius:50%;
+    flex:0 0 auto; width:54px; height:54px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-family: Georgia, serif; font-size:20px; font-weight:800; color: var(--gold-s);
+    font-family: Georgia, serif; font-size:19px; font-weight:800; color: var(--gold-s);
     background: radial-gradient(circle at 35% 28%, #21603f, var(--green-dk) 72%);
-    border: 2px solid var(--gold);
-    box-shadow: 0 0 20px rgba(212,175,55,0.3), inset 0 0 16px rgba(0,0,0,0.55);
+    border: 2px solid var(--subj);
+    box-shadow: 0 0 20px var(--subj-soft), inset 0 0 16px rgba(0,0,0,0.55);
     cursor:pointer; user-select:none;
-    transition: transform .15s; animation: breath 3.5s ease-in-out infinite;
+    transition: transform .15s, border-color .6s, box-shadow .6s;
+    animation: breath 3.5s ease-in-out infinite;
   }
   .crest:active { transform: scale(0.92); }
-  @keyframes breath { 0%,100%{box-shadow:0 0 14px rgba(212,175,55,0.28), inset 0 0 16px rgba(0,0,0,0.55);} 50%{box-shadow:0 0 28px rgba(212,175,55,0.5), inset 0 0 16px rgba(0,0,0,0.55);} }
+  @keyframes breath { 0%,100%{ box-shadow:0 0 12px var(--subj-soft), inset 0 0 16px rgba(0,0,0,0.55);} 50%{ box-shadow:0 0 26px var(--subj-soft), inset 0 0 16px rgba(0,0,0,0.55);} }
 
   .titles h1 { font-size:1.05rem; line-height:1.2; font-weight:800; color:var(--gold-s); }
   .titles .sub { font-size:.66rem; color:var(--muted); margin-top:2px; }
@@ -64,7 +69,10 @@
   .clock-box {
     text-align:right; background: rgba(5,16,26,0.55);
     border:1px solid var(--line); border-radius:14px; padding:8px 14px;
+    box-shadow: 0 0 14px rgba(0,0,0,0.35);
+    transition: border-color .6s, box-shadow .6s;
   }
+  .clock-box.mess { border-color: color-mix(in srgb, var(--subj) 55%, var(--line)); box-shadow: 0 0 18px var(--subj-soft); }
   .clock-box .t {
     font-size:1.5rem; font-weight:800; line-height:1;
     font-variant-numeric: tabular-nums; font-family:"SF Mono","Cascadia Mono",Consolas,monospace;
@@ -74,21 +82,50 @@
   .clock-box .m { font-size:.58rem; color:var(--muted); }
   .clock-box .d { font-size:.62rem; color:var(--gold-s); font-weight:700; }
 
-  /* ---------- Status ---------- */
-  .statusbar {
-    margin-bottom: 12px; border-radius:12px; padding:10px 12px;
-    background: linear-gradient(90deg, rgba(21,82,48,0.45), rgba(11,33,56,0.55));
-    border:1px solid var(--line);
-    display:flex; align-items:center; gap:10px; font-size:.84rem;
+  /* ---------- Day switcher ---------- */
+  .daybar {
+    display:flex; gap:8px; overflow-x:auto; margin-bottom: 12px;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
-  .statusbar .pip {
+  .daybar::-webkit-scrollbar { display:none; }
+  .pday {
+    flex:1 1 0; min-width:60px; padding:9px 6px; text-align:center;
+    border-radius:11px; border:1.5px solid var(--line); background: var(--card);
+    color: var(--muted); font-weight:700; font-size:.82rem; cursor:pointer;
+    transition: all .18s; white-space:nowrap;
+  }
+  .pday .mk { display:block; font-size:.55rem; color:var(--gold); font-weight:600; }
+  .pday.today { border-color: rgba(240,210,114,0.55); }
+  .pday.active {
+    background: linear-gradient(160deg, var(--subj), #0e3a26);
+    border-color: var(--subj); color:#eafff5;
+    box-shadow: 0 0 16px var(--subj-soft);
+  }
+
+  /* ---------- Now banner ---------- */
+  .nowbar {
+    margin-bottom: 12px; border-radius: 14px; padding: 10px 12px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--subj) 22%, rgba(11,33,56,0.7)), rgba(11,33,56,0.6));
+    border: 1px solid color-mix(in srgb, var(--subj) 45%, var(--line));
+    box-shadow: 0 0 16px var(--subj-soft);
+    display:flex; align-items:center; gap:12px;
+    transition: background .6s, border-color .6s, box-shadow .6s;
+  }
+  .nowbar .pip {
     flex:0 0 auto; width:9px;height:9px;border-radius:50%;
-    background: var(--green-br); box-shadow:0 0 10px var(--green-br); animation:pulse 1.7s infinite;
+    background: var(--subj); box-shadow:0 0 10px var(--subj); animation:pulse 1.7s infinite;
   }
   @keyframes pulse { 0%,100%{opacity:1} 45%{opacity:.2} }
-  .statusbar .txt b { color: var(--gold-s); }
-  .statusbar .led { margin-left:auto; font-size:.62rem; color:var(--gold); letter-spacing:.1em; display:none; }
-  .statusbar .led.on { display:inline-block; }
+  .nowbar .tico { font-size:1.6rem; line-height:1; }
+  .nowbar .mid { flex:1; min-width:0; }
+  .nowbar .mid .who { font-size:.58rem; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+  .nowbar .mid .what { font-size:1.04rem; font-weight:800; color:var(--text); line-height:1.2; }
+  .nowbar .mid .what b { color: var(--gold-s); }
+  .nowbar .rgt { text-align:right; white-space:nowrap; }
+  .nowbar .rgt .num { font-size:.86rem; font-weight:800; color:var(--subj); font-variant-numeric:tabular-nums; }
+  .nowbar .rgt .lbl { font-size:.56rem; color:var(--muted); }
+  .nowbar .sim { margin-top:5px; font-size:.6rem; color:var(--gold); display:none; text-align:right; }
+  .nowbar .sim.on { display:block; }
 
   /* ---------- Matrix ---------- */
   .grid-scroll {
@@ -100,15 +137,13 @@
   .grid-scroll::-webkit-scrollbar { height:8px; }
   .grid-scroll::-webkit-scrollbar-thumb { background: var(--green-sm); border-radius:10px; }
 
-  table.matrix { border-collapse:separate; border-spacing:6px; width:100%; min-width:780px; }
+  table.matrix { border-collapse:separate; border-spacing:6px; width:100%; min-width:800px; }
 
   table.matrix th, table.matrix td {
-    padding:9px 8px; text-align:center; vertical-align:middle;
+    padding:9px 7px; text-align:center; vertical-align:middle;
     border-radius:10px; font-size:.8rem; line-height:1.35;
+    overflow-wrap:anywhere; word-break:break-word;
   }
-  table.matrix th, table.matrix td { overflow-wrap:anywhere; word-break:break-word; }
-  table.matrix td { font-size:.76rem; }
-  table.matrix thead th { font-size:.7rem; }
 
   /* header (time, horizontal) */
   table.matrix thead th {
@@ -116,44 +151,40 @@
     background: var(--head); border:1px solid var(--line);
     color: var(--gold-s); font-weight:800; font-size:.74rem; white-space:nowrap;
   }
+  table.matrix thead th .big { display:block; font-size:.95rem; }
   table.matrix thead th .st { display:block; font-size:.6rem; color:var(--muted); font-weight:500; font-variant-numeric:tabular-nums; }
   table.matrix thead th.lunchh { color: var(--muted); border-style:dashed; }
   table.matrix thead th.lunchh .st { color: var(--gold); }
+  table.matrix thead th.colnow { color: var(--subj); background:#0a2a1a; border-color: var(--subj); }
 
   /* grid cells (subjects) */
   table.matrix td {
-    background: var(--card); border:1px solid var(--line);
-    font-weight:700;
+    background: var(--card); border:1px solid var(--line); font-weight:700;
   }
+  table.matrix td .ico { margin-right:5px; }
   table.matrix td.lza { border-style:dashed; color:var(--muted); font-weight:600; background: rgba(40,18,5,0.28); }
 
   /* day column (vertical) */
   table.matrix th.corner {
     position:sticky; left:0; top:0; z-index:4;
-    background: #061218;
+    background:#061218; color:var(--muted); font-size:.66rem;
   }
   table.matrix td.day {
     position:sticky; left:0; z-index:1;
     background: var(--daycol); border:1px solid var(--line);
     min-width:104px; text-align:left; font-weight:800; color:var(--text); font-size:.82rem;
   }
-  table.matrix td.day .ico { margin-right:5px; }
 
-  /* today row + live column + cell */
-  table.matrix tr.rtoday td.day { color: var(--gold-s); border-color: rgba(240,210,114,0.5); }
-  table.matrix tr.rtoday td:not(.day){ background: rgba(21,82,48,0.30); }
-  table.matrix td.colnow { background: rgba(42,160,106,0.36); }
+  /* selected day row + live column + cell */
+  table.matrix tr.rview td.day { color: var(--subj); border-color: var(--subj); }
+  table.matrix tr.rview td:not(.day){ background: color-mix(in srgb, var(--subj) 14%, var(--card)); }
+  table.matrix tr.rtoday td.day { border-color: var(--gold-s); }
+  table.matrix td.colnow { background: color-mix(in srgb, var(--subj) 18%, var(--card)); }
   table.matrix td.cellnow {
-    border:1.5px solid var(--gold);
-    box-shadow: 0 0 0 1px var(--gold), 0 0 18px rgba(212,175,55,0.3);
-    background: rgba(64,44,8,0.55);
+    border:1.5px solid var(--subj);
+    box-shadow: 0 0 0 1px var(--subj), 0 0 18px var(--subj-soft);
+    background: color-mix(in srgb, var(--subj) 30%, var(--card));
   }
-  table.matrix thead th.colnow { color: var(--green-br); background: #0a2a1a; }
-
-  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; box-shadow:0 0 8px currentColor; }
-  .c-geo{color:#f0a04b}.c-hist{color:#ef6a6a}.c-sci{color:#52e8a2}.c-my{color:#c3a9ff}
-  .c-math{color:#5fb2ff}.c-eng{color:#4fd2e0}.c-art{color:#ff8ec9}.c-civ{color:#ffa457}
-  .c-mus{color:#d9a4ff}.c-soc{color:#62e3b0}.c-hum{color:#ffcf5e}
 
   /* ---------- Test panel ---------- */
   .test-panel {
@@ -192,20 +223,6 @@
     font-family:inherit; box-shadow:0 8px 26px rgba(0,0,0,.5); cursor:pointer; z-index:60; display:none;
   }
 
-  /* test console opener button */
-  #gear {
-    position:fixed; right:14px; bottom:16px;
-    width:52px; height:52px; border-radius:50%;
-    background:linear-gradient(160deg, var(--green-sm), #0e3a26);
-    border:2px solid var(--gold); color:var(--gold-s);
-    font-size:22px; cursor:pointer; z-index:55;
-    box-shadow:0 6px 20px rgba(0,0,0,.5);
-    display:flex; align-items:center; justify-content:center;
-    transition:transform .15s;
-  }
-  #gear:active { transform:scale(.9) rotate(40deg); }
-  @media (max-width:599px){ #gear{ right:12px; bottom:12px; width:48px; height:48px; font-size:20px; } }
-
   /* always-visible error banner */
   #errbox {
     display:none; position:fixed; left:50%; top:10px; transform:translateX(-50%);
@@ -232,16 +249,27 @@
         <p class="sub">ဆဋ္ဌမတန်း &middot; မြန်မာစံတော်ချိန်</p>
       </div>
     </div>
-    <div class="clock-box">
+    <div class="clock-box" id="clockBox">
       <div class="t"><span id="clkH">--</span>:<span id="clkM">--</span><small id="clkMer"></small></div>
       <div class="meta"><span class="m" id="clkZone">MST</span><span class="d" id="clkDay">—</span></div>
     </div>
   </header>
 
-  <div class="statusbar">
+  <!-- day switcher -->
+  <nav class="daybar" id="daybar"></nav>
+
+  <!-- live now banner -->
+  <div class="nowbar" id="nowbar">
     <span class="pip"></span>
-    <span class="txt" id="statusTxt">…</span>
-    <span class="led" id="simLed">⏱ စမ်းသပ်အချိန်</span>
+    <span class="tico" id="nowIco">🔔</span>
+    <div class="mid">
+      <div class="who" id="nowWho">—</div>
+      <div class="what" id="nowWhat">—</div>
+    </div>
+    <div class="rgt">
+      <div><span class="num" id="nowNum">—</span> <span class="lbl" id="nowLbl"></span></div>
+      <div class="sim" id="simLed">⏱ စမ်းသပ်အချိန်</div>
+    </div>
   </div>
 
   <!-- timetable matrix: days vertical, time horizontal -->
@@ -281,9 +309,28 @@
   <footer>G6 အချိန်ဇယား · မြန်မာစံတော်ချိန် · ၂၀၂၆</footer>
 </div>
 
-<button id="unlock">🔔 အသံဖွင့်ရန် နှိပ်ပါ</button>
-<button id="gear" title="စမ်းသပ်ကိရိယာ">🔧</button><script>
+<button id="unlock">🔔 အသံဖွင့်ရန် နှိပ်ပါ</button><script>
 "use strict";
+try {
+
+/* ---------------- Error reporting (always visible) ---------------- */
+function showErr(msg) {
+  const b = document.getElementById("errbox");
+  if (!b) return;
+  b.classList.add("on");
+  const line = document.createElement("div");
+  line.innerHTML = "<span class='tag'>ERROR</span>" + String(msg).replace(/</g,"&lt;");
+  b.appendChild(line);
+  console.error(msg);
+}
+window.addEventListener("error", function(ev){
+  let s = (ev.message || "အမှား") + " · " + (ev.filename || "") + ":" + (ev.lineno || "?");
+  if (ev.error && ev.error.stack) s += "\n" + String(ev.error.stack).split("\n").slice(0,4).join("\n");
+  showErr(s);
+});
+window.addEventListener("unhandledrejection", function(ev){
+  showErr("Promise: " + (ev.reason && ev.reason.message || String(ev.reason)));
+});
 
 /* ---------------- Audio ---------------- */
 const SOUNDS = {
@@ -295,7 +342,6 @@ const SOUNDS = {
 const audio = {};
 for (const k in SOUNDS) { audio[k] = new Audio(SOUNDS[k]); audio[k].preload = "auto"; }
 let unlocked = false;
-
 function doUnlock() {
   unlocked = true;
   document.getElementById("unlock").style.display = "none";
@@ -306,29 +352,6 @@ function doUnlock() {
 }
 document.getElementById("unlock").onclick = doUnlock;
 document.addEventListener("pointerdown", () => { if (!unlocked) doUnlock(); });
-
-/* ---------------- Always-visible error reporting ---------------- */
-function showErr(msg) {
-  const b = document.getElementById("errbox");
-  if (!b) return;
-  b.classList.add("on");
-  const line = document.createElement("div");
-  line.innerHTML = "<span class='tag'>ERROR</span>" + msg.replace(/</g,"&lt;");
-  b.appendChild(line);
-  console.error(msg);
-}
-window.addEventListener("error", function(ev){
-  let s = (ev.message || "အမှား") + " · " + (ev.filename || "") + ":" + (ev.lineno || "?") + ":" + (ev.colno || "?");
-  if (ev.error && ev.error.stack) s += "\n" + String(ev.error.stack).split("\n").slice(0,4).join("\n");
-  showErr(s);
-});
-window.addEventListener("unhandledrejection", function(ev){
-  showErr("Promise: " + (ev.reason && ev.reason.message || String(ev.reason)));
-});
-
-/* ---------------- Test console opener (gear) ---------------- */
-const GEAR = document.getElementById("gear");
-if (GEAR) GEAR.onclick = () => showTest(TEST.hidden ? false : true);
 
 function stopAll() { for (const k in audio) { audio[k].pause(); audio[k].currentTime = 0; } }
 function play(name, onEnd) {
@@ -345,11 +368,10 @@ function seq(list, i = 0) {
   toast("♪ " + label);
   play(name, () => seq(list, i + 1));
 }
-
-function playStartOfDay()  { seq([["bell","ခေါင်းလောင်း"],["anthem","နိုင်ငံတော်သီချင်း"],["bell","စတင်ရန်ခေါင်းလောင်း"]]); }
-function playChimes()      { seq([["chimes","နာရီသံ"]]); }
-function playLunchBell()   { seq([["bell","နားချိန်ခေါင်းလောင်း"]]); }
-function playEndOfDay()    { seq([["bell","ခေါင်းလောင်း"],["bell","ခေါင်းလောင်း"],["patriotic","ဇာတိမာန်သီချင်း"],["bell","ခေါင်းလောင်း"]]); }
+function playStartOfDay() { seq([["bell","ခေါင်းလောင်း"],["anthem","နိုင်ငံတော်သီချင်း"],["bell","စတင်ရန်ခေါင်းလောင်း"]]); }
+function playChimes()     { seq([["chimes","နာရီသံ"]]); }
+function playLunchBell()  { seq([["bell","နားချိန်ခေါင်းလောင်း"]]); }
+function playEndOfDay()   { seq([["bell","ခေါင်းလောင်း"],["bell","ခေါင်းလောင်း"],["patriotic","ဇာတိမာန်သီချင်း"],["bell","ခေါင်းလောင်း"]]); }
 
 /* ---------------- Times ---------------- */
 const PERIODS = [
@@ -362,29 +384,46 @@ const PERIODS = [
   { n:7, s:795, e:870 },  // 13:15-14:30
   { n:8, s:870, e:900 }   // 14:30-15:00
 ];
-const LUNCH = { s:720, e:750 };  // 12:00-12:30
-const START_DAY = 8*60+55;       // 8:55
-const END_DAY = 900;             // 15:00
+const LUNCH = { s:720, e:750 };
+const START_DAY = 8*60+55;
+const END_DAY = 900;
 
-const ORD = ["ပထမ","ဒုတိယ","တတိယ","စတုတ္ထ","ပဉ္စမ","ဆဋ္ဌမ","သတ္တမ","အဋ္ဌမ"];
+const BN = ["၀","၁","၂","၃","၄","၅","၆","၇","၈","၉"];
+function bn(n){ return String(n).split("").map(c=>BN[+c]).join(""); }
+const HEM = {8:"🕗",9:"🕘",10:"🕙",11:"🕚",12:"🕛",13:"🕐",14:"🕑",15:"🕒"};
 const MYDAYS = ["တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ"];
 
 function fmt(m) { const h=Math.floor(m/60), mm=m%60; return h+":"+String(mm).padStart(2,"0"); }
 function mer(m) { const h=Math.floor(m/60); return h<12?"နံနက်":(h<18?"ညနေ":"ည"); }
 
-/* ---------------- Data ---------------- */
+/* ---------------- Subjects: icon + colour ---------------- */
+const SUBJ = {
+  "ပထဝီဝင်": { ico:"🌍", c:"#f0a04b" },
+  "သမိုင်း":   { ico:"📜", c:"#ef6a6a" },
+  "သိပ္ပံ":    { ico:"🔬", c:"#52e8a2" },
+  "မြန်မာ":    { ico:"📖", c:"#c3a9ff" },
+  "သင်္ချာ":   { ico:"🔢", c:"#5fb2ff" },
+  "Eng":      { ico:"✍️", c:"#4fd2e0" },
+  "Arts":     { ico:"🎨", c:"#ff8ec9" },
+  "Cvics":    { ico:"🏛️", c:"#ffa457" },
+  "Music":    { ico:"🎵", c:"#d9a4ff" },
+  "Socials":  { ico:"🌐", c:"#62e3b0" }
+};
+const LUNCH_META = { ico:"🍚", c:"#d4af37", name:"နေ့လည်စာ နားချိန်" };
+const FALLBACK =   { ico:"⏰", c:"#d4af37" };
+
+/* ---------------- Data (Humanitration -> Cvics) ---------------- */
 const TIMETABLE = {
-  "တနင်္လာ":    [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["မြန်မာ","c-my"],["သင်္ချာ","c-math"],["သင်္ချာ","c-math"],["Cvics","c-civ"],["ပထဝီဝင်","c-geo"]],
-  "အင်္ဂါ":      [["ပထဝီဝင်","c-geo"],["သမိုင်း","c-hist"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Arts","c-art"],["သင်္ချာ","c-math"],["သိပ္ပံ","c-sci"],["ပထဝီဝင်","c-geo"]],
-  "ဗုဒ္ဓဟူး":    [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["သင်္ချာ","c-math"],["Eng","c-eng"],["သင်္ချာ","c-math"],["Music","c-mus"],["ပထဝီဝင်","c-geo"]],
-  "ကြာသပတေး":  [["ပထဝီဝင်","c-geo"],["မြန်မာ","c-my"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["Eng","c-eng"],["Socials","c-soc"],["Humanitration","c-hum"],["ပထဝီဝင်","c-geo"]],
-  "သောကြာ":     [["ပထဝီဝင်","c-geo"],["သိပ္ပံ","c-sci"],["Eng","c-eng"],["မြန်မာ","c-my"],["Eng","c-eng"],["မြန်မာ","c-my"],["သမိုင်း","c-hist"],["ပထဝီဝင်","c-geo"]]
+  "တနင်္လာ":    ["ပထဝီဝင်","သမိုင်း","သိပ္ပံ","မြန်မာ","သင်္ချာ","သင်္ချာ","Cvics","ပထဝီဝင်"],
+  "အင်္ဂါ":      ["ပထဝီဝင်","သမိုင်း","သိပ္ပံ","သင်္ချာ","Arts","သင်္ချာ","သိပ္ပံ","ပထဝီဝင်"],
+  "ဗုဒ္ဓဟူး":    ["ပထဝီဝင်","မြန်မာ","သိပ္ပံ","သင်္ချာ","Eng","သင်္ချာ","Music","ပထဝီဝင်"],
+  "ကြာသပတေး":  ["ပထဝီဝင်","မြန်မာ","သိပ္ပံ","Eng","Eng","Socials","Cvics","ပထဝီဝင်"],
+  "သောကြာ":     ["ပထဝီဝင်","သိပ္ပံ","Eng","မြန်မာ","Eng","မြန်မာ","သမိုင်း","ပထဝီဝင်"]
 };
 const DAYLIST = Object.keys(TIMETABLE);
 
 /* ---------------- Clock (Myanmar Standard Time) ---------------- */
 let simOffset = 0;
-
 function realNow() {
   const f = new Intl.DateTimeFormat("en-GB", { timeZone:"Asia/Yangon", hour:"2-digit", minute:"2-digit", hour12:false });
   const [hh,mm] = f.format(new Date()).split(":");
@@ -408,7 +447,6 @@ function classify(m) {
 
 /* ---------------- Event engine ---------------- */
 let fired = {};
-
 const EVENTS = [
   { at:START_DAY, key:"start", fn:playStartOfDay },
   { at:585, key:"e1", fn:playChimes },
@@ -421,7 +459,6 @@ const EVENTS = [
   { at:870, key:"e7", fn:playChimes },
   { at:900, key:"end", fn:playEndOfDay }
 ];
-
 function fireDue() {
   if (todayIdx() < 0) return;
   const m = nowMin();
@@ -431,65 +468,159 @@ function fireDue() {
 }
 function resetFired() { fired = {}; }
 
-/* ---------------- Matrix render: days vertical, time horizontal ---------------- */
-const WRAP = document.getElementById("matrixWrap");
+/* ---------------- View state ---------------- */
+let viewDay = MYDAYS[Math.max(0, todayIdx())];
 
-/* column order: P1..P5, lunch, P6..P8 */
-function colSpan(i) {
-  if (i <= 4) return { ord:ORD[i], sfx:fmt(PERIODS[i].s) };
-  if (i === 5) return { ord:"နားချိန်", sfx:"🍚 ၁၂:၀၀–၁၂:၃၀" };
-  return { ord:ORD[i], sfx:fmt(PERIODS[i-1].s) };
+/* ---------------- Render ---------------- */
+const DAYBAR = document.getElementById("daybar");
+const WRAP   = document.getElementById("matrixWrap");
+const ROOT   = document.documentElement;
+
+function colHead(c) {
+  if (c <= 4) {
+    const p = PERIODS[c];
+    return { big: bn(p.n), st: (HEM[Math.floor(p.s/60)]||"🕒") + " " + fmt(p.s) };
+  }
+  if (c === 5) return { big:"🍚", st:"နားချိန်<br>၁၂:၀၀–၁၂:၃၀" };
+  const p = PERIODS[c-1];
+  return { big: bn(p.n), st: (HEM[Math.floor(p.s/60)]||"🕒") + " " + fmt(p.s) };
+}
+
+function renderDaybar() {
+  DAYBAR.innerHTML = "";
+  const tIdx = todayIdx();
+  DAYLIST.forEach((d, r) => {
+    const b = document.createElement("button");
+    b.className = "pday" + (d===viewDay ? " active" : "") + (r===tIdx ? " today" : "");
+    const t = r === tIdx;
+    b.innerHTML = d + (t ? "<span class='mk'>ယနေ့</span>" : (d===viewDay ? "<span class='mk'>ရွေးထား</span>" : "<span class='mk'>&nbsp;</span>"));
+    b.onclick = () => { viewDay = d; renderAll(); };
+    DAYBAR.appendChild(b);
+  });
 }
 
 function renderMatrix() {
+  const m   = nowMin();
+  const st  = classify(m);
   const tIdx = todayIdx();
-  const m = nowMin();
-  const st = classify(m);
 
-  /* current column (0..8) */
+  /* current column: P1..P5 -> 0..4, lunch -> 5, P6..P8 -> 6..8 */
   let cur = -1;
-  if (st.k === "in") cur = st.i <= 4 ? st.i : st.i + 1;   // P6..P8 -> col 5+...+1
+  if (st.k === "in") cur = st.i <= 4 ? st.i : st.i + 1;
   else if (st.k === "lunch") cur = 5;
 
   let html = "<table class='matrix'><thead><tr>";
-  html += "<th class='corner'>နေ့</th>";
+  html += "<th class='corner'>နေ့ ↓ &nbsp; ချိန် →</th>";
   for (let c=0;c<9;c++) {
-    const cs = colSpan(c);
-    const cls = "st" + (c===5 ? " lunchh" : "") + (c===cur ? " colnow" : "");
-    html += `<th class="${cls}">${cs.ord}<span class="st">${cs.sfx}</span></th>`;
+    const ch = colHead(c);
+    html += `<th class="${c===5?"lunchh":""}${c===cur?" colnow":""}"><span class='big'>${ch.big}</span><span class='st'>${ch.st}</span></th>`;
   }
   html += "</tr></thead><tbody>";
 
   DAYLIST.forEach((d, r) => {
-    const t = r === tIdx;
-    html += `<tr class="${t ? "rtoday" : ""}">`;
-    html += `<td class="day">${t ? "◉ " : ""}${d}</td>`;
+    const isView   = d === viewDay;
+    const isToday  = r === tIdx;
+    const rowCls = (isView ? " rview" : "") + (isToday ? " rtoday" : "");
+    html += `<tr class="${rowCls}">`;
+    html += `<td class="day">${isToday ? "◉ " : ""}${d}</td>`;
     for (let c=0;c<9;c++) {
       if (c === 5) {
-        html += `<td class="lza ${c===cur && t ? "cellnow" : ""}">🍚 ၁၂:၀၀–၁၂:၃၀</td>`;
+        const live = c===cur && isView;
+        html += `<td class="lza${live?" cellnow":""}">🍚 နားချိန်</td>`;
         continue;
       }
       const pi = c <= 4 ? c : c - 1;
-      const [name, cl] = TIMETABLE[d][pi];
-      const now = (c===cur && t) ? " cellnow" : "";
-      const colnow = (c===cur) ? " colnow" : "";
-      html += `<td class="${now}${colnow}"><span class="dot ${cl}"></span>${name}</td>`;
+      const s  = TIMETABLE[d][pi];
+      const meta = SUBJ[s] || FALLBACK;
+      const live = c===cur && isView;
+      const scol = c===cur ? " colnow" : "";
+      html += `<td class="${scol}${live?" cellnow":""}"><span class='ico'>${meta.ico}</span>${s}</td>`;
     }
     html += "</tr>";
   });
-
   html += "</tbody></table>";
   WRAP.innerHTML = html;
+}
 
-  /* status */
-  const tb = document.getElementById("statusTxt");
-  document.getElementById("simLed").className = "led" + (simOffset ? " on" : "");
-  if (tIdx < 0) tb.innerHTML = "ပိတ်ရက် ဖြစ်ပါသည် — စာချိန်မရှိပါ";
-  else if (st.k === "before") tb.innerHTML = "ကျောင်းမစသေးပါ · နောက်ခေါင်းလောင်း <b>" + fmt(START_DAY) + "</b>";
-  else if (st.k === "in") tb.innerHTML = "စာချိန် <b>" + ORD[st.i] + "</b> သင်နေသည် · ဆုံး <b>" + fmt(PERIODS[st.i].e) + "</b>";
-  else if (st.k === "lunch") tb.innerHTML = "<b>နေ့လည်စာ နားချိန်</b> · " + (LUNCH.e - m) + " မိနစ်အကြာ ပြန်တက်ရမည်";
-  else if (st.k === "after") tb.innerHTML = "ကျောင်းပြီးပါပြီ ✔";
-  else tb.innerHTML = "စာချိန်ကြားတွင် နားချိန်";
+/* theming: everything follows the current subject on the selected day */
+function applyTheme() {
+  const m   = nowMin();
+  const st  = classify(m);
+  const tIdx = todayIdx();
+  const who = tIdx < 0 ? "ပိတ်ရက်" : viewDay;
+
+  let meta, subjName, num, lbl, what;
+  const nowb = document.getElementById("nowbar");
+  const whoEl = document.getElementById("nowWho");
+  const whatEl = document.getElementById("nowWhat");
+  const icoEl = document.getElementById("nowIco");
+  const numEl = document.getElementById("nowNum");
+  const lblEl = document.getElementById("nowLbl");
+  const simLed = document.getElementById("simLed");
+  const clockBox = document.getElementById("clockBox");
+
+  simLed.className = "sim" + (simOffset ? " on" : "");
+  clockBox.classList.toggle("mess", st.k === "in" || st.k === "lunch");
+
+  if (tIdx < 0) {
+    whoEl.textContent = who;
+    whatEl.textContent = "ပိတ်ရက်မို့ စာချိန်မရှိပါ";
+    icoEl.textContent = "🎉";
+    numEl.textContent = "—";
+    lblEl.textContent = "";
+    ROOT.style.setProperty("--subj", FALLBACK.c);
+    ROOT.style.setProperty("--subj-soft", hexSoft(FALLBACK.c));
+    return;
+  }
+
+  whoEl.textContent = who;
+  if (st.k === "in") {
+    const p = PERIODS[st.i];
+    const s = TIMETABLE[viewDay][st.i];
+    meta = SUBJ[s] || FALLBACK;
+    numEl.textContent = bn(p.e - m);
+    lblEl.textContent = "မိနစ် ကျန်";
+    icoEl.textContent = meta.ico;
+    whatEl.innerHTML = `<b>${s}</b> စာချိန် ` + bn(PERIODS[st.i].n) + " သင်နေသည်";
+  } else if (st.k === "lunch") {
+    meta = LUNCH_META;
+    icoEl.textContent = meta.ico;
+    numEl.textContent = bn(LUNCH.e - m);
+    lblEl.textContent = "မိနစ် ကျန်";
+    whatEl.innerHTML = "နေ့လည်စာ <b>နားချိန်</b> ဖြစ်သည်";
+  } else if (st.k === "before") {
+    meta = FALLBACK;
+    icoEl.textContent = "🔔";
+    numEl.textContent = "၈:၅၅";
+    lblEl.textContent = "ခေါင်းလောင်း";
+    whatEl.innerHTML = "ကျောင်း <b>မစသေးပါ</b>";
+  } else if (st.k === "after") {
+    meta = FALLBACK;
+    icoEl.textContent = "🎉";
+    numEl.textContent = "—";
+    lblEl.textContent = "";
+    whatEl.innerHTML = "<b>ကျောင်းပြီးပါပြီ</b>";
+  } else {
+    meta = FALLBACK;
+    icoEl.textContent = "☕";
+    numEl.textContent = "—";
+    lblEl.textContent = "";
+    whatEl.innerHTML = "စာချိန်ကြား <b>နားချိန်</b>";
+  }
+  ROOT.style.setProperty("--subj", meta.c);
+  ROOT.style.setProperty("--subj-soft", hexSoft(meta.c));
+}
+
+function hexSoft(hex) {
+  const h = hex.replace("#","");
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  return "rgba(" + r + "," + g + "," + b + ",0.16)";
+}
+
+function renderAll() {
+  renderDaybar();
+  renderMatrix();
+  applyTheme();
 }
 
 /* ---------------- Test console ---------------- */
@@ -519,7 +650,7 @@ const GRID = document.getElementById("tpGrid");
 for (let i=0;i<8;i++) {
   const b = document.createElement("button");
   b.className = "pbtn";
-  b.innerHTML = `${ORD[i]}<small>${fmt(PERIODS[i].s)}</small>`;
+  b.innerHTML = bn(i+1) + "<small>" + fmt(PERIODS[i].s) + "</small>";
   b.onclick = () => jumpTo(i);
   GRID.appendChild(b);
 }
@@ -554,28 +685,31 @@ document.getElementById("mEnd").onclick   = () => setSim(900, playEndOfDay);
 /* ---------------- Clock / toast / loop ---------------- */
 function refreshClock() {
   const m = nowMin();
-  document.getElementById("clkH").textContent = Math.floor(m/60);
-  document.getElementById("clkM").textContent = String(m%60).padStart(2,"0");
+  document.getElementById("clkH").textContent = bn(Math.floor(m/60));
+  document.getElementById("clkM").textContent = bn(String(m%60).padStart(2,"0"));
   document.getElementById("clkMer").textContent = " " + mer(m);
   document.getElementById("clkDay").textContent = todayIdx() >= 0 ? MYDAYS[todayIdx()] : "ပိတ်ရက်";
   document.getElementById("offLbl").textContent = (simOffset>0?"+":"") + simOffset + " မိနစ်";
 }
-
 function toast(msg) { document.getElementById("toast").textContent = msg; }
 
 function refresh() {
   try {
     refreshClock();
-    renderMatrix();
+    renderAll();
     fireDue();
   } catch (e) {
     showErr("refresh: " + (e.message || e) + (e && e.stack ? "\n" + String(e.stack).split("\n").slice(0,3).join("\n") : ""));
   }
 }
 
-window.addEventListener("resize", renderMatrix);
+window.addEventListener("resize", renderAll);
 refresh();
 setInterval(refresh, 1000);
+
+} catch (initErr) {
+  showErr("init: " + (initErr.message || initErr) + (initErr.stack ? "\n" + String(initErr.stack).split("\n").slice(0,3).join("\n") : ""));
+}
 </script>
 </body>
 </html>
