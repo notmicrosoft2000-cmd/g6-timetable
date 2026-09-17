@@ -204,13 +204,22 @@
   .s-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
   .sbtn { flex:1; min-width:112px; padding:11px 8px; border-radius:11px; border:1px solid var(--line); background:var(--card); color:var(--text); font-size:.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:all .15s; }
   .sbtn:active { background:var(--green); border-color:var(--green-br); transform:scale(.96); }
-  .timer-row { margin-top:14px; }
-  .timer-row .lbl { display:flex; justify-content:space-between; font-size:.68rem; color:var(--muted); margin-bottom:6px; }
-  .timer-row .lbl b { color:var(--gold-s); }
   .range { width:100%; accent-color:var(--green-br); }
-  .mini-row { display:flex; gap:8px; margin-top:10px; }
+
+  /* custom timeline slider */
+  .timeline { margin-top:14px; }
+  .tl-lbl { display:flex; justify-content:space-between; align-items:center; font-size:.68rem; color:var(--muted); margin-bottom:10px; }
+  .tl-lbl b { color:var(--gold-s); font-size:.8rem; font-variant-numeric:tabular-nums; }
+  .tl-wrap { position:relative; padding:0 0 26px; }
+  .tl-wrap .tl { width:100%; }
+  .ticks { position:absolute; left:1.5%; right:1.5%; bottom:4px; height:20px; pointer-events:none; }
+  .ticks i { position:absolute; bottom:0; width:2px; height:7px; background:var(--line); transform:translateX(-50%); }
+  .ticks i.tl-bell { height:15px; background:var(--green-br); box-shadow:0 0 6px var(--green-br); }
+  .ticks i.tl-lunch { height:13px; background:var(--gold); box-shadow:0 0 6px var(--gold); }
+  .tl-labels { display:flex; justify-content:space-between; font-size:.62rem; color:var(--muted); margin-bottom:10px; }
   .mini { flex:1; padding:9px; border-radius:9px; border:1px solid var(--line); background:rgba(255,255,255,0.03); color:var(--text); font-size:.74rem; cursor:pointer; font-weight:600; }
   .mini:active { background:var(--green); }
+  .mini.full { width:100%; padding:11px; font-size:.8rem; }
   .tp-hint { margin-top:12px; font-size:.62rem; color:var(--muted); line-height:1.7; }
 
   .toast { max-width:420px; margin:14px auto 0; text-align:center; color:var(--muted); font-size:.74rem; min-height:20px; }
@@ -289,15 +298,14 @@
       <button class="sbtn" data-sound="bell"><span class="ic">🔔</span> ခေါင်းလောင်း</button>
       <button class="sbtn" data-sound="patriotic"><span class="ic">🇲🇲</span> ဇာတိမာန်သီချင်း</button>
     </div>
-    <div class="timer-row">
-      <div class="lbl"><span>⏱ အချိန်ရွှေ့ပြောင်းမှု (မိနစ်)</span><b id="offLbl">+0</b></div>
-      <input type="range" class="range" id="offRange" min="-180" max="180" step="5" value="0">
-    </div>
-    <div class="mini-row">
-      <button class="mini" id="mReal">လက်ရှိအချိန်</button>
-      <button class="mini" id="mLunchS">နေ့လည် ၁၂:၀၀</button>
-      <button class="mini" id="mLunchE">နေ့လည် ၁၂:၃၀</button>
-      <button class="mini" id="mEnd">နေ့လည် ၃:၀၀</button>
+    <div class="timeline">
+      <div class="tl-lbl"><span>⏱ စမ်းသပ်အချိန် ရွေးရန်</span><b id="tlVal">—</b></div>
+      <div class="tl-wrap">
+        <input type="range" class="range tl" id="tlRange" min="360" max="1080" step="1" value="600" aria-label="စမ်းသပ်အချိန်">
+        <div class="ticks" id="ticks"></div>
+      </div>
+      <div class="tl-labels"><span>၆:၀၀ နံနက်</span><span>၉:၀၀</span><span>၁၂:၀၀</span><span>၃:၀၀ ညနေ</span></div>
+      <button class="mini full" id="tlReal">🔄 ပုံမှန်အချိန်သို့ ပြန်ရောက်</button>
     </div>
     <div class="tp-hint">
       🖱 ကွန်ပျူတာ: <b>Shift + Alt + 1</b> ဖွင့်/ပိတ် &middot; <b>Shift + 1…8</b> စာချိန်ခုန်ကျော်
@@ -371,7 +379,22 @@ function seq(list, i = 0) {
 function playStartOfDay() { seq([["bell","ခေါင်းလောင်း"],["anthem","နိုင်ငံတော်သီချင်း"],["bell","စတင်ရန်ခေါင်းလောင်း"]]); }
 function playChimes()     { seq([["chimes","နာရီသံ"]]); }
 function playLunchBell()  { seq([["bell","နားချိန်ခေါင်းလောင်း"]]); }
-function playEndOfDay()   { seq([["bell","ခေါင်းလောင်း"],["bell","ခေါင်းလောင်း"],["patriotic","ဇာတိမာန်သီချင်း"],["bell","ခေါင်းလောင်း"]]); }
+function playEndOfDay() {
+  toast("🔔 ခေါင်းလောင်း (၁)");
+  play("bell", () => {
+    toast("⋯ ၁၀ စက္ကန့် ⋯");
+    setTimeout(() => {
+      toast("🔔 ခေါင်းလောင်း (၂)");
+      play("bell", () => {
+        toast("🇲🇲 ဇာတိမာန်သီချင်း");
+        play("patriotic", () => {
+          toast("🔔 ခေါင်းလောင်း (၃)");
+          play("bell");
+        });
+      });
+    }, 10000);
+  });
+}
 
 /* ---------------- Times ---------------- */
 const PERIODS = [
@@ -393,8 +416,9 @@ function bn(n){ return String(n).split("").map(c=>BN[+c]).join(""); }
 const HEM = {8:"🕗",9:"🕘",10:"🕙",11:"🕚",12:"🕛",13:"🕐",14:"🕑",15:"🕒"};
 const MYDAYS = ["တနင်္လာ","အင်္ဂါ","ဗုဒ္ဓဟူး","ကြာသပတေး","သောကြာ"];
 
-function fmt(m) { const h=Math.floor(m/60), mm=m%60; return h+":"+String(mm).padStart(2,"0"); }
-function mer(m) { const h=Math.floor(m/60); return h<12?"နံနက်":(h<18?"ညနေ":"ည"); }
+function fmt(m) { const h=Math.floor(m/60), mm=m%60; const h12=h%12===0?12:h%12; return h12+":"+String(mm).padStart(2,"0")+" "+mer(m); }
+function short12(m) { const h=Math.floor(m/60), mm=m%60; const h12=h%12===0?12:h%12; return h12+":"+String(mm).padStart(2,"0"); }
+function mer(m) { const h=Math.floor(m/60); return h<12?"နံနက်":(h===12?"မွန်းတည့်":(h<18?"ညနေ":"ည")); }
 
 /* ---------------- Subjects: icon + colour ---------------- */
 const SUBJ = {
@@ -637,8 +661,6 @@ document.addEventListener("keydown", e => {
 function jumpTo(i) {
   const p = PERIODS[i];
   simOffset = p.s - realNow();
-  normalize();
-  document.getElementById("offRange").value = clamp(simOffset);
   resetFired();
   refresh();
   const trig = [playStartOfDay, playChimes, playChimes, playChimes,
@@ -666,30 +688,41 @@ document.querySelectorAll(".sbtn").forEach(b => {
   };
 });
 
-const OFF = document.getElementById("offRange");
-OFF.oninput = () => { simOffset = +OFF.value; resetFired(); refresh(); };
-function clamp(v){ return Math.max(-180, Math.min(180, v)); }
-function normalize(){ while(simOffset>180) simOffset-=1440; while(simOffset<-180) simOffset+=1440; }
-function setSim(target, playNow) {
-  simOffset = target - realNow();
-  normalize();
-  OFF.value = clamp(simOffset);
-  resetFired(); refresh();
-  if (playNow) playNow();
-}
-document.getElementById("mReal").onclick = () => { OFF.value=0; simOffset=0; resetFired(); refresh(); };
-document.getElementById("mLunchS").onclick = () => setSim(720);
-document.getElementById("mLunchE").onclick = () => setSim(750);
-document.getElementById("mEnd").onclick   = () => setSim(900, playEndOfDay);
+/* timeline scrubber: replaces offset slider + quick-jump buttons */
+const TL   = document.getElementById("tlRange");
+const TICKS = document.getElementById("ticks");
+const TL_MIN = 360, TL_MAX = 1080;
+(function buildTicks() {
+  const marks = [
+    {t:535, c:"tl-bell"},  {t:585, c:""}, {t:630, c:""}, {t:660, c:""},
+    {t:690, c:""}, {t:720, c:"tl-lunch"}, {t:750, c:"tl-lunch"},
+    {t:795, c:""}, {t:870, c:""}, {t:900, c:"tl-bell"}
+  ];
+  marks.forEach(o => {
+    const i = document.createElement("i");
+    i.className = o.c;
+    i.style.left = ((o.t - TL_MIN) / (TL_MAX - TL_MIN) * 100) + "%";
+    i.title = fmt(o.t);
+    TICKS.appendChild(i);
+  });
+})();
+function setSimTime(t) { simOffset = t - realNow(); resetFired(); refresh(); }
+TL.oninput = () => setSimTime(+TL.value);
+TL.onchange = () => setSimTime(+TL.value);
+document.getElementById("tlReal").onclick = () => { TL.value = nowMin(); setSimTime(nowMin()); };
 
 /* ---------------- Clock / toast / loop ---------------- */
 function refreshClock() {
   const m = nowMin();
-  document.getElementById("clkH").textContent = bn(Math.floor(m/60));
-  document.getElementById("clkM").textContent = bn(String(m%60).padStart(2,"0"));
+  const h = Math.floor(m/60), mm = m % 60;
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  document.getElementById("clkH").textContent = bn(h12);
+  document.getElementById("clkM").textContent = bn(String(mm).padStart(2,"0"));
   document.getElementById("clkMer").textContent = " " + mer(m);
   document.getElementById("clkDay").textContent = todayIdx() >= 0 ? MYDAYS[todayIdx()] : "ပိတ်ရက်";
-  document.getElementById("offLbl").textContent = (simOffset>0?"+":"") + simOffset + " မိနစ်";
+  TL.value = Math.max(TL_MIN, Math.min(TL_MAX, m));
+  document.getElementById("tlVal").textContent =
+    fmt(m) + (simOffset === 0 ? " · ပုံမှန်" : "");
 }
 function toast(msg) { document.getElementById("toast").textContent = msg; }
 
