@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G6 Time Table</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.4rem;
+      padding: 14px 0 6px;
+      color: #38bdf8;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    /* Day selector */
+    .days {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 0 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .days::-webkit-scrollbar { display: none; }
+
+    .day-btn {
+      flex: 0 0 auto;
+      padding: 7px 16px;
+      border: 1.5px solid #334155;
+      border-radius: 20px;
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .day-btn.active {
+      background: #0ea5e9;
+      border-color: #0ea5e9;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(14,165,233,0.35);
+    }
+
+    /* Timetable cards */
+    .schedule { display: flex; flex-direction: column; gap: 8px; }
+
+    .card {
+      display: flex;
+      align-items: stretch;
+      background: #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    .period-num {
+      width: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #64748b;
+      background: #162032;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .card.break-card .period-num {
+      background: #1a1a2e;
+      color: #475569;
+    }
+
+    .period-info {
+      flex: 1;
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .subject {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .card.break-card .period-info {
+      justify-content: center;
+    }
+    .card.break-card .subject {
+      color: #475569;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-style: italic;
+    }
+
+    /* Colour dots per subject */
+    .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    /* Subject colours */
+    .c-geo   { background: #f59e0b; }  /* ပထဝီဝင် */
+    .c-hist  { background: #ef4444; }  /* သမိုင်း */
+    .c-sci   { background: #10b981; }  /* သိပ္ပံ */
+    .c-my    { background: #a78bfa; }  /* မြန်မာ */
+    .c-math  { background: #3b82f6; }  /* သင်္ချာ */
+    .c-eng   { background: #06b6d4; }  /* Eng / eng */
+    .c-art   { background: #f472b6; }  /* arts */
+    .c-civ   { background: #fb923c; }  /* Cvics */
+    .c-mus   { background: #c084fc; }  /* Music */
+    .c-soc   { background: #34d399; }  /* Socials */
+    .c-hum   { background: #fbbf24; }  /* HUmanitration */
+    .c-brk   { background: #334155; }  /* break */
+
+    /* Hide all days except today initially */
+    .day-schedule { display: none; }
+    .day-schedule.active { display: flex; flex-direction: column; gap: 8px; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px 0 12px;
+      font-size: 0.65rem;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+
+<h1>G6 Time Table</h1>
+<p class="subtitle">Grade 6 &middot; Weekly Schedule</p>
+
+<div class="days" id="days"></div>
+<div id="schedule"></div>
+
+<footer>Updated Sep 2026</footer>
+
+<script>
+const timetable = {
+  "Monday": [
+    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
+    { period: "2", subject: "သမိုင်း", cls: "c-hist" },
+    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
+    { period: "4", subject: "မြန်မာ", cls: "c-my" },
+    { period: "5", subject: "သင်္ချာ", cls: "c-math" },
+    { period: "brk", subject: "Break", cls: "c-brk" },
+    { period: "6", subject: "သင်္ချာ", cls: "c-math" },
+    { period: "7", subject: "Cvics", cls: "c-civ" },
+    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
+  ],
+  "Tuesday": [
+    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
+    { period: "2", subject: "သမိုင်း", cls: "c-hist" },
+    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
+    { period: "4", subject: "သင်္ချာ", cls: "c-math" },
+    { period: "5", subject: "Arts", cls: "c-art" },
+    { period: "brk", subject: "Break", cls: "c-brk" },
+    { period: "6", subject: "သင်္ချာ", cls: "c-math" },
+    { period: "7", subject: "သိပ္ပံ", cls: "c-sci" },
+    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
+  ],
+  "Wednesday": [
+    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
+    { period: "2", subject: "မြန်မာ", cls: "c-my" },
+    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
+    { period: "4", subject: "သင်္ချာ", cls: "c-math" },
+    { period: "5", subject: "Eng", cls: "c-eng" },
+    { period: "brk", subject: "Break", cls: "c-brk" },
+    { period: "6", subject: "သင်္ချာ", cls: "c-math" },
+    { period: "7", subject: "Music", cls: "c-mus" },
+    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
+  ],
+  "Thursday": [
+    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
+    { period: "2", subject: "မြန်မာ", cls: "c-my" },
+    { period: "3", subject: "သိပ္ပံ", cls: "c-sci" },
+    { period: "4", subject: "Eng", cls: "c-eng" },
+    { period: "5", subject: "Eng", cls: "c-eng" },
+    { period: "brk", subject: "Break", cls: "c-brk" },
+    { period: "6", subject: "Socials", cls: "c-soc" },
+    { period: "7", subject: "Humanitration", cls: "c-hum" },
+    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
+  ],
+  "Friday": [
+    { period: "1", subject: "ပထဝီဝင်", cls: "c-geo" },
+    { period: "2", subject: "သိပ္ပံ", cls: "c-sci" },
+    { period: "3", subject: "Eng", cls: "c-eng" },
+    { period: "4", subject: "မြန်မာ", cls: "c-my" },
+    { period: "5", subject: "Eng", cls: "c-eng" },
+    { period: "brk", subject: "Break", cls: "c-brk" },
+    { period: "6", subject: "မြန်မာ", cls: "c-my" },
+    { period: "7", subject: "သမိုင်း", cls: "c-hist" },
+    { period: "8", subject: "ပထဝီဝင်", cls: "c-geo" }
+  ]
+};
+
+const days = Object.keys(timetable);
+const daysEl = document.getElementById("days");
+const scheduleEl = document.getElementById("schedule");
+
+const dayShort = { Monday: "Mon", Tuesday: "Tue", Wednesday: "Wed", Thursday: "Thu", Friday: "Fri" };
+
+let activeDay = days[new Date().getDay() - 1] || "Monday";
+
+function render() {
+  daysEl.innerHTML = "";
+  scheduleEl.innerHTML = "";
+
+  days.forEach(day => {
+    const btn = document.createElement("button");
+    btn.className = "day-btn" + (day === activeDay ? " active" : "");
+    btn.textContent = dayShort[day] || day;
+    btn.onclick = () => { activeDay = day; render(); };
+    daysEl.appendChild(btn);
+  });
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "day-schedule active";
+
+  timetable[activeDay].forEach(item => {
+    const isBreak = item.period === "brk";
+    const card = document.createElement("div");
+    card.className = "card" + (isBreak ? " break-card" : "");
+    card.innerHTML = `
+      <div class="period-num">${isBreak ? "·" : "P" + item.period}</div>
+      <div class="period-info">
+        <span class="subject"><span class="dot ${item.cls}"></span>${item.subject}</span>
+      </div>
+    `;
+    wrapper.appendChild(card);
+  });
+
+  scheduleEl.appendChild(wrapper);
+}
+
+render();
+</script>
+
+</body>
+</html>
